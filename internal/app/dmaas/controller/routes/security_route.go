@@ -10,12 +10,16 @@ import (
 	"net/http"
 )
 
+type SecurityController struct {
+	Repository repository.UserRepositoryInterface
+}
+
 type LoginRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
-func LoginAction(c *gin.Context) {
+func (controller SecurityController) LoginAction(c *gin.Context) {
 	session := sessions.Default(c)
 	var request LoginRequest
 
@@ -24,7 +28,7 @@ func LoginAction(c *gin.Context) {
 		return
 	}
 
-	user, err := repository.FindUserByUsername(request.Username)
+	user, err := controller.Repository.GetUserByUsername(request.Username)
 
 	if err != nil {
 		response.CreateUnauthorizedResponse(c, "Invalid credentials")
@@ -42,7 +46,7 @@ func LoginAction(c *gin.Context) {
 	c.JSON(http.StatusAccepted, request)
 
 }
-func LogoutAction(c *gin.Context) {
+func (controller SecurityController) LogoutAction(c *gin.Context) {
 	session := sessions.Default(c)
 	session.Delete(middleware.UserKey)
 	err := session.Save()

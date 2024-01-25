@@ -4,6 +4,8 @@ import (
 	"dmaas/internal/app/dmaas/config"
 	"dmaas/internal/app/dmaas/controller"
 	"dmaas/internal/app/dmaas/database"
+	"dmaas/internal/app/dmaas/repository"
+	sources "dmaas/internal/app/dmaas/service"
 	"net/http"
 )
 
@@ -12,19 +14,30 @@ type Application struct {
 	BindAddr string
 }
 
-func (a *Application) Run() error {
-	err := config.LoadConfig()
+func (application *Application) Run() error {
+
+	configLoader := config.ConfigLoader{}
+
+	cfg, err := configLoader.LoadConfig()
 	if err != nil {
 		return err
 	}
 
-	err = database.ConnectAndMigrate()
+	db, err := database.ConnectAndMigrate(cfg)
 
 	if err != nil {
 		return err
 	}
 
-	return http.ListenAndServe(a.BindAddr, controller.NewRouter())
+	router := controller.Router{
+		//Repositories
+		SourceRepository: &repository.SourceRepository{DB: db},
+		UserRepository:   &repository.UserRepository{DB: db},
+		//Services
+		SourceManager: &sources.SourceManager{DB: db},
+	}
+
+	return http.ListenAndServe(application.BindAddr, router.NewRouter())
 }
 
 func New(bindAddr string) *Application {

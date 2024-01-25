@@ -20,6 +20,10 @@ func CreateUnauthorizedResponse(c *gin.Context, text string) {
 	createResponse(c, http.StatusUnauthorized, text)
 }
 
+func CreateInternalServerResponse(c *gin.Context, text string) {
+	createResponse(c, http.StatusInternalServerError, text)
+}
+
 func createResponse(c *gin.Context, statusCode int, error string) {
 	c.AbortWithStatusJSON(statusCode, ErrorResponse{error})
 }

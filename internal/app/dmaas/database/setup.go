@@ -8,12 +8,10 @@ import (
 	"gorm.io/gorm"
 )
 
-var DB *gorm.DB
-
-func ConnectAndMigrate() error {
-	database, err := gorm.Open(postgres.Open(config.CFG.Database.DSN))
+func ConnectAndMigrate(cfg *config.Config) (*gorm.DB, error) {
+	database, err := gorm.Open(postgres.Open(cfg.Database.DSN))
 	if err != nil {
-		return errors.New("failed connect to database")
+		return nil, errors.New("failed connect to database")
 	}
 
 	err = database.AutoMigrate(entity.User{})
@@ -25,10 +23,8 @@ func ConnectAndMigrate() error {
 	err = database.Exec("CREATE EXTENSION IF NOT EXISTS postgres_fdw").Error
 
 	if err != nil {
-		return errors.New("failed auto migrate database")
+		return nil, errors.New("failed auto migrate database")
 	}
 
-	DB = database
-
-	return nil
+	return database, nil
 }

@@ -1,11 +1,17 @@
 package sources
 
 import (
-	"dmaas/internal/app/dmaas/database"
 	"dmaas/internal/app/dmaas/entity"
-	"dmaas/internal/app/dmaas/service/postgresql"
+	"dmaas/internal/app/dmaas/service/driver"
+	"dmaas/internal/app/dmaas/service/driver/postgresql"
+	"errors"
 	"fmt"
+	"gorm.io/gorm"
 )
+
+type SourceManager struct {
+	DB *gorm.DB
+}
 
 type InformationSchemaTable struct {
 	TableName string
@@ -17,35 +23,35 @@ type InformationSchemaColumn struct {
 	IsNullable string
 }
 
-func HandleSourceCreated(source entity.Source) {
-	localSchemaName, err := createLocalSchema(source)
+// ImportDatabase only start in goroutine!
+func (manager *SourceManager) ImportDatabase(source entity.Source) {
+	localSchemaName, err := manager.createLocalSchema(source)
+	databaseDriver, err := manager.GetDriverByType(source.Type)
 
-	//Choice driver by source type (planed: mysql, oracle, db2, linter, mssql, etc)
-	switch source.Type {
-	case entity.PostgreSQLType:
-		err = postgresql.ImportPostgreSQLDatabase(source, localSchemaName)
-		if err != nil {
-			return
-		}
-	default:
-		//return if unsupported type
+	if err != nil {
 		return
 	}
 
-	err = importStructure(source, localSchemaName)
+	err = databaseDriver.ImportDatabase(source, localSchemaName)
+
+	if err != nil {
+		return
+	}
+
+	err = manager.importStructure(source, localSchemaName)
 	if err == nil {
 		source.Alive = true
-		database.DB.Save(&source)
+		manager.DB.Save(&source)
 	}
 }
 
-func importStructure(source entity.Source, localSchemaName string) error {
-	tables, err := getTables(localSchemaName)
+func (manager *SourceManager) importStructure(source entity.Source, localSchemaName string) error {
+	tables, err := manager.getTables(localSchemaName)
 
 	for _, table := range tables {
 		tableDB := entity.Table{Name: table.TableName, SourceID: source.ID}
-		fields, err := getTableFields(tableDB.Name, localSchemaName)
-		database.DB.Create(&tableDB)
+		fields, err := manager.getTableFields(tableDB.Name, localSchemaName)
+		manager.DB.Create(&tableDB)
 
 		if err != nil {
 			continue
@@ -59,28 +65,41 @@ func importStructure(source entity.Source, localSchemaName string) error {
 				TableID:  tableDB.ID,
 			}
 
-			database.DB.Create(&fieldDB)
+			manager.DB.Create(&fieldDB)
 		}
 	}
 
 	return err
 }
 
-func createLocalSchema(source entity.Source) (string, error) {
+func (manager *SourceManager) createLocalSchema(source entity.Source) (string, error) {
 	schemaName := fmt.Sprintf("import_schema_%v", source.ID)
 	sql := fmt.Sprintf("CREATE SCHEMA IF NOT EXISTS %v", schemaName)
-	return schemaName, database.DB.Exec(sql).Error
+	return schemaName, manager.DB.Exec(sql).Error
 }
 
-func getTables(localSchemaName string) ([]InformationSchemaTable, error) {
+func (manager *SourceManager) getTables(localSchemaName string) ([]InformationSchemaTable, error) {
 	var tables []InformationSchemaTable
 	sql := fmt.Sprintf("SELECT table_name FROM information_schema.tables WHERE table_schema='%v'", localSchemaName)
-	return tables, database.DB.Raw(sql).Scan(&tables).Error
+	return tables, manager.DB.Raw(sql).Scan(&tables).Error
 }
 
-func getTableFields(tableName, localSchema string) ([]InformationSchemaColumn, error) {
+func (manager *SourceManager) getTableFields(tableName, localSchema string) ([]InformationSchemaColumn, error) {
 	var fields []InformationSchemaColumn
 	sql := fmt.Sprintf("SELECT column_name, data_type, is_nullable "+
 		"FROM information_schema.columns WHERE table_schema='%v' AND table_name = '%v'", localSchema, tableName)
-	return fields, database.DB.Raw(sql).Scan(&fields).Error
+	return fields, manager.DB.Raw(sql).Scan(&fields).Error
+}
+
+// GetDriverByType Choice driver by source type (planed: mysql, oracle, db2, linter, mssql, etc)
+func (manager *SourceManager) GetDriverByType(_type string) (driver.DriverInterface, error) {
+	switch _type {
+	case entity.PostgreSQLType:
+		return &postgresql.PostgreSQLDriver{DB: manager.DB}, nil
+		//case entity.MySQLType:
+		//	return manager.MySQLDriver.ImportDatabase(source, localSchemaName)
+		//case entity.OracleType:
+		//	return manager.OracleDriver.ImportDatabase(source, localSchemaName)
+	}
+	return nil, errors.New("invalid driver type")
 }

@@ -8,7 +8,8 @@ import (
 
 const DatabaseDsn = "DATABASE_DSN"
 
-var CFG *Config
+type ConfigLoader struct {
+}
 
 type Config struct {
 	Database Database
@@ -18,7 +19,7 @@ type Database struct {
 	DSN string
 }
 
-func New() *Config {
+func (loader *ConfigLoader) createConfig() *Config {
 	return &Config{
 		Database: Database{
 			DSN: utils.GetEnvStr(DatabaseDsn, ""),
@@ -26,27 +27,25 @@ func New() *Config {
 	}
 }
 
-func LoadConfig() error {
+func (loader *ConfigLoader) LoadConfig() (*Config, error) {
 	var cfg *Config
 
-	cfg = New()
-	if err := validate(cfg); err != nil {
-		return err
+	cfg = loader.createConfig()
+	if err := loader.validate(cfg); err != nil {
+		return nil, err
 	}
 
-	CFG = cfg
-
-	return nil
+	return cfg, nil
 }
 
-func validate(cfg *Config) error {
+func (loader *ConfigLoader) validate(cfg *Config) error {
 	if cfg.Database.DSN == "" {
-		return createNotNullEnvError(DatabaseDsn)
+		return loader.createNotNullEnvError(DatabaseDsn)
 	}
 
 	return nil
 }
 
-func createNotNullEnvError(envName string) error {
+func (loader *ConfigLoader) createNotNullEnvError(envName string) error {
 	return errors.New(fmt.Sprintf("env variable %v cannot be null", envName))
 }

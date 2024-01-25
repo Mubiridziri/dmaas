@@ -1,19 +1,26 @@
 package routes
 
-import "github.com/gin-gonic/gin"
+import (
+	"dmaas/internal/app/dmaas/repository"
+	"github.com/gin-gonic/gin"
+)
 
-func listUsersAction(c *gin.Context)  {}
-func createUserAction(c *gin.Context) {}
-func editUserAction(c *gin.Context)   {}
-func detailUserAction(c *gin.Context) {}
-func removeUserAction(c *gin.Context) {}
+type UserController struct {
+	Repository repository.UserRepositoryInterface
+}
 
-func AddUserRoute(r *gin.RouterGroup) {
+func (controller *UserController) listUsersAction(c *gin.Context)  {}
+func (controller *UserController) createUserAction(c *gin.Context) {}
+func (controller *UserController) editUserAction(c *gin.Context)   {}
+func (controller *UserController) detailUserAction(c *gin.Context) {}
+func (controller *UserController) removeUserAction(c *gin.Context) {}
+
+func (controller *UserController) AddUserRoute(r *gin.RouterGroup) {
 	userGroup := r.Group("/users")
 
-	userGroup.GET("", listUsersAction)
-	userGroup.POST("", createUserAction)
-	userGroup.PUT("/:id", editUserAction)
-	userGroup.GET("/:id", detailUserAction)
-	userGroup.DELETE("/:id", removeUserAction)
+	userGroup.GET("", controller.listUsersAction)
+	userGroup.POST("", controller.createUserAction)
+	userGroup.PUT("/:id", controller.editUserAction)
+	userGroup.GET("/:id", controller.detailUserAction)
+	userGroup.DELETE("/:id", controller.removeUserAction)
 }

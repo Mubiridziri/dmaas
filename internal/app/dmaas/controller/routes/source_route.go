@@ -2,12 +2,21 @@ package routes
 
 import (
 	"dmaas/internal/app/dmaas/controller/response"
+	"dmaas/internal/app/dmaas/entity"
+	"dmaas/internal/app/dmaas/repository"
+	"dmaas/internal/app/dmaas/service"
 	"errors"
 	"github.com/gin-gonic/gin"
+	"net/http"
 	"strings"
 )
 
-type NewSourceRequest struct {
+type SourceController struct {
+	Repository    repository.SourceRepositoryInterface
+	SourceManager sources.SourceManager
+}
+
+type SourceRequest struct {
 	Title    string `json:"title" binding:"required"`
 	Name     string `json:"name" binding:"required"`
 	Type     string `json:"type" binding:"required"`
@@ -18,8 +27,8 @@ type NewSourceRequest struct {
 	Schema   string `json:"schema" binding:"required"`
 }
 
-// Validate Where need move validation for models?
-func (model *NewSourceRequest) Validate() error {
+// Validate TODO MOVE TO .... ???
+func (model *SourceRequest) Validate() error {
 	if strings.Contains(model.Name, ";") {
 		return errors.New("name contains is forbidden symbol")
 	}
@@ -40,30 +49,58 @@ func (model *NewSourceRequest) Validate() error {
 	return nil
 }
 
-func listSourcesAction(c *gin.Context) {}
+func (controller *SourceController) listSourcesAction(c *gin.Context) {}
 
-func createSourceAction(c *gin.Context) {
-	var request NewSourceRequest
+func (controller *SourceController) createSourceAction(c *gin.Context) {
+	var request SourceRequest
 
 	if err := c.BindJSON(&request); err != nil {
 		response.CreateBadRequestResponse(c, err.Error())
 		return
 	}
 
+	if err := request.Validate(); err != nil {
+		response.CreateBadRequestResponse(c, err.Error())
+		return
+	}
+
+	//TODO MOVE TO .... ????
+	source := entity.Source{
+		Title:    request.Title,
+		Name:     request.Name,
+		Type:     request.Type,
+		Host:     request.Host,
+		Port:     request.Port,
+		Username: request.Username,
+		Password: request.Password,
+		Schema:   request.Schema,
+	}
+	err := controller.Repository.CreateSource(&source)
+
+	if err != nil {
+		response.CreateInternalServerResponse(c, err.Error())
+		return
+	}
+
+	//TODO MOVE TO ... ???
+	go controller.SourceManager.ImportDatabase(source) //side task for import database
+
+	c.JSON(http.StatusCreated, source)
+
 }
 
-func editSourceAction(c *gin.Context) {}
+func (controller *SourceController) editSourceAction(c *gin.Context) {}
 
-func detailSourceAction(c *gin.Context) {}
+func (controller *SourceController) detailSourceAction(c *gin.Context) {}
 
-func removeSourceAction(c *gin.Context) {}
+func (controller *SourceController) removeSourceAction(c *gin.Context) {}
 
-func AddSourceRoute(r *gin.RouterGroup) {
+func (controller *SourceController) AddSourceRoute(r *gin.RouterGroup) {
 	userGroup := r.Group("/sources")
 
-	userGroup.GET("", listSourcesAction)
-	userGroup.POST("", createSourceAction)
-	userGroup.PUT("/:id", editSourceAction)
-	userGroup.GET("/:id", detailSourceAction)
-	userGroup.DELETE("/:id", removeSourceAction)
+	userGroup.GET("", controller.listSourcesAction)
+	userGroup.POST("", controller.createSourceAction)
+	userGroup.PUT("/:id", controller.editSourceAction)
+	userGroup.GET("/:id", controller.detailSourceAction)
+	userGroup.DELETE("/:id", controller.removeSourceAction)
 }
