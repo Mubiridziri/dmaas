@@ -15,7 +15,6 @@ type Application struct {
 }
 
 func (application *Application) Run() error {
-
 	configLoader := config.ConfigLoader{}
 
 	cfg, err := configLoader.LoadConfig()

@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"dmaas/docs"
 	"dmaas/internal/app/dmaas/controller/middleware"
 	"dmaas/internal/app/dmaas/controller/routes"
 	"dmaas/internal/app/dmaas/repository"
@@ -8,6 +9,8 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // TODO generate when Application Run
@@ -29,6 +32,16 @@ func (router *Router) NewRouter() *gin.Engine {
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 	r.Use(sessions.Sessions("AUTH", cookie.NewStore(secret)))
+
+	//Swagger
+	docs.SwaggerInfo.Title = "DMAAS"
+	docs.SwaggerInfo.Description = "Data management and analytic system"
+	docs.SwaggerInfo.Version = "1.0"
+	docs.SwaggerInfo.Host = "localhost:8080"
+	docs.SwaggerInfo.BasePath = "/v1"
+	docs.SwaggerInfo.Schemes = []string{"http"}
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	//Init controllers
 	securityController := routes.SecurityController{Repository: router.UserRepository}

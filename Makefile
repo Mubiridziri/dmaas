@@ -8,8 +8,11 @@ clean: ## Remove temporary files
 
 .PHONY: dev-start
 dev-start:
-	export DATABASE_DSN="host=localhost user=postgres password=postgres dbname=app port=5432 sslmode=disable"
-	go run cmd/dmaas/main.go
+	export DATABASE_DSN="host=localhost user=postgres password=postgres dbname=app port=5432 sslmode=disable" && go run cmd/dmaas/main.go
+
+.PHONY: swag # Update swagger.json
+swag:
+	swag init -g ./cmd/dmaas/main.go
 
 # Absolutely awesome: http://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
 .PHONY: help
