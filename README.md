@@ -1,16 +1,75 @@
-# DMAAS
-> Data management and analytic system
+# DMAAS - Data Management And Analytic System
+> Система подключения разных источников данных, кросс-субд запросов и умных отчетов по собранным датасетам
 
 [![Go](https://github.com/Mubiridziri/dmaas/actions/workflows/go.yml/badge.svg)](https://github.com/Mubiridziri/dmaas/actions/workflows/go.yml)
 ____
 
+## Какие функции поддерживает проект? (или будет поддерживать в перспективе)
+
+ - ✅ Подключение данных из разных источников
+ - ✅ [WIP] Создание общих датасетов с данными из одних или разных СУБД (без программирования и SQL)
+ - ✅ [WIP] Автоматические слепки данных по датасетам в указанные интервалы времены
+ - ✅ [WIP] Отслеживание показателей на основе слепков (тенденции)
+ - ✅ [WIP] Прогнозирование показателей при сохранении тенденции изменения значений 
+ - ✅ [WIP] Автоматические математические операции "налету" (в датасетах)
+ - ✅ [WIP] Создание собственных справочников для использования в датасетах (прим. расшифровка значений из удаленной БД)
+ - ✅ [WIP] Построение графиков на основе датасетов
+ - ✅ [WIP] Создание пользовательских статестических экранов (дашбордов) с использованием различных форм представления данных
+
+## Технологии
+
+### Подключение внешних источников 
+
+Подключение внешних источников происходит посредством технологии PostgreSQL Foreign Data Wrapper. Данная технология 
+позволяет знакомить базу данных приложения (PostgreSQL) с другими СУБД через Data Wrapper, а также оперрировать
+данными в другой БД не дублируя их в базе данных приложения. То есть, мы храним описания структур данных другой базы данных, а
+сами данные запрашивает только в момент потребности. 
+
+### Датасеты и кеширование
+
+Для создания датасетов и их кеширования (для доступа данным даже тогда, когда удаленная БД стала недоступна по каким либо причинам)
+мы используем PostgreSQL Materialized View. Данный вид View отличается от стандартных тем, что хранит в себе последний запрашиваемый слепок данных.
+
+### Бекенд
+
+Бекенд приложения написан на языке Go с использованием таких основных пакетов как:
+ - [gin-gonic](https://github.com/gin-gonic/gin)
+ - [GORM](https://gorm.io/)
+ - [Swag](https://github.com/swaggo/swag)
+
+Прочие зависимости можно посмотреть в `go.mod`
+
+
+### Прочие технологии
+
+ - Docker & Docker-Compose
+ - Makefile
+ - PostgreSQL
+ - GitHub Actions
+
+
+## Как запустить проект?
+
+### Для запуска в dev-окружении при условии, что у Вас установлен Go
+```bash
+$ make dev
+```
+
+### Для запуска в Docker-Compose
+```bash
+$ make docker-up
+```
+
+## Полезные команды
 
 ```bash
-$ make <command>
+$ make help
+build                          Build a version
+clean                          Remove temporary files
+dev                            Go Run
+swag                           Update swagger.json
+swag-fmt                       Formatter for GoDoc (Swagger)
+docker-up                      Start Docker-Compose Container with app & database
+docker-down                    Down Docker-Compose Containers
+docker-database-up             Start Docker-compose Container with only database service
 ```
-### Commands: 
-
- - build                          
-Build a version
- -  clean                          
-Remove temporary files
