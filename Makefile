@@ -18,6 +18,14 @@ swag: ## Update swagger.json
 swag-fmt: ## Formatter for GoDoc (Swagger)
 	swag fmt -g ./cmd/dmaas/main.go
 
+.PHONY: docker-up
+docker-up: ## Start Docker-Compose Container with app & database
+	docker-compose -f build/docker-compose.yml up -d --build
+
+.PHONY: docker-database-up
+docker-database-up: ## Start Docker-compose Container with only database service
+	docker-compose -f build/docker-compose.yml up datbase -d
+
 .PHONY: help
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
