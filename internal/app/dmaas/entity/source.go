@@ -3,15 +3,15 @@ package entity
 const PostgreSQLType = "postgresql"
 
 type Source struct {
-	ID       int
-	Title    string
-	Name     string
-	Type     string //postgresql, mysql, oracle, innodb, etc
-	Host     string
-	Port     int
-	Username string
-	Password string
-	Schema   string
-	Alive    bool
-	Tables   []Table
+	ID       int     `json:"id"`
+	Title    string  `json:"title"`
+	Name     string  `json:"name"`
+	Type     string  `json:"type"` //postgresql, mysql, oracle, innodb, etc
+	Host     string  `json:"host"`
+	Port     int     `json:"port"`
+	Username string  `json:"-"`
+	Password string  `json:"-"`
+	Schema   string  `json:"schema"`
+	Alive    bool    `json:"alive"`
+	Tables   []Table `json:"tables"`
 }

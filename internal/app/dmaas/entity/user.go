@@ -7,12 +7,12 @@ import (
 )
 
 type User struct {
-	ID        int `gorm:"primary_key"`
-	Name      string
-	Username  string `gorm:"unique"`
-	Password  string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        int       `gorm:"primary_key" json:"id"`
+	Name      string    `json:"name"`
+	Username  string    `gorm:"unique" json:"username"`
+	Password  string    `json:"-"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 func (user *User) BeforeCreate(tx *gorm.DB) (err error) {

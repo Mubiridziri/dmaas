@@ -41,7 +41,11 @@ func (repository *SourceRepository) ListSources(page, limit int) ([]entity.Sourc
 
 func (repository *SourceRepository) GetSourceById(id int) (entity.Source, error) {
 	var source entity.Source
-	if err := repository.DB.Where(entity.Source{ID: id}).First(&source).Error; err != nil {
+	if err := repository.DB.
+		Preload("Tables").
+		Preload("Tables.Fields").
+		Where(entity.Source{ID: id}).
+		First(&source).Error; err != nil {
 		return entity.Source{}, err
 	}
 
