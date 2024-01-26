@@ -16,6 +16,27 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/api/v1/login": {
+            "get": {
+                "description": "You can check auth or get profile data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Security"
+                ],
+                "summary": "Profile",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.User"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Authorization with help username and password",
                 "consumes": [
@@ -423,20 +444,11 @@ const docTemplate = `{
                 "comment": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer"
-                },
                 "name": {
                     "type": "string"
                 },
                 "nullable": {
                     "type": "boolean"
-                },
-                "table": {
-                    "$ref": "#/definitions/entity.Table"
-                },
-                "tableID": {
-                    "type": "integer"
                 },
                 "type": {
                     "type": "string"
@@ -458,9 +470,6 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "password": {
-                    "type": "string"
-                },
                 "port": {
                     "type": "integer"
                 },
@@ -479,9 +488,6 @@ const docTemplate = `{
                 "type": {
                     "description": "postgresql, mysql, oracle, innodb, etc",
                     "type": "string"
-                },
-                "username": {
-                    "type": "string"
                 }
             }
         },
@@ -497,27 +503,24 @@ const docTemplate = `{
                         "$ref": "#/definitions/entity.Field"
                     }
                 },
-                "id": {
-                    "type": "integer"
-                },
                 "name": {
                     "type": "string"
-                },
-                "sourceID": {
-                    "type": "integer"
                 }
             }
         },
         "entity.User": {
             "type": "object",
             "properties": {
+                "created_at": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
                 "name": {
                     "type": "string"
                 },
-                "password": {
+                "updated_at": {
                     "type": "string"
                 },
                 "username": {

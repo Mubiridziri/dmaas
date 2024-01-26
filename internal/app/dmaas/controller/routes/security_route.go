@@ -58,6 +58,16 @@ func (controller *SecurityController) LoginAction(c *gin.Context) {
 
 }
 
+// ProfileAction GoDoc
+//
+//	@Summary	Profile
+//	@Schemes
+//	@Description	You can check auth or get profile data
+//	@Tags			Security
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	entity.User
+//	@Router			/api/v1/login [GET]
 func (controller *SecurityController) ProfileAction(c *gin.Context) {
 	user := c.MustGet("user").(entity.User)
 	c.JSON(http.StatusOK, user)

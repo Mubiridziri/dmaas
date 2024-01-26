@@ -22,6 +22,11 @@ swag-fmt: ## Formatter for GoDoc (Swagger)
 docker-up: ## Start Docker-Compose Container with app & database
 	docker-compose -f build/docker-compose.yml up -d --build
 
+.PHONY: docker-down
+docker-down: ## Down Docker-Compose Containers
+	docker-compose -f build/docker-compose.yml down
+
+
 .PHONY: docker-database-up
 docker-database-up: ## Start Docker-compose Container with only database service
 	docker-compose -f build/docker-compose.yml up datbase -d

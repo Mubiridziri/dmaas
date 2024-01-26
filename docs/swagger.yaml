@@ -3,16 +3,10 @@ definitions:
     properties:
       comment:
         type: string
-      id:
-        type: integer
       name:
         type: string
       nullable:
         type: boolean
-      table:
-        $ref: '#/definitions/entity.Table'
-      tableID:
-        type: integer
       type:
         type: string
     type: object
@@ -25,8 +19,6 @@ definitions:
       id:
         type: integer
       name:
-        type: string
-      password:
         type: string
       port:
         type: integer
@@ -41,8 +33,6 @@ definitions:
       type:
         description: postgresql, mysql, oracle, innodb, etc
         type: string
-      username:
-        type: string
     type: object
   entity.Table:
     properties:
@@ -52,20 +42,18 @@ definitions:
         items:
           $ref: '#/definitions/entity.Field'
         type: array
-      id:
-        type: integer
       name:
         type: string
-      sourceID:
-        type: integer
     type: object
   entity.User:
     properties:
+      created_at:
+        type: string
       id:
         type: integer
       name:
         type: string
-      password:
+      updated_at:
         type: string
       username:
         type: string
@@ -118,6 +106,20 @@ info:
   contact: {}
 paths:
   /api/v1/login:
+    get:
+      consumes:
+      - application/json
+      description: You can check auth or get profile data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.User'
+      summary: Profile
+      tags:
+      - Security
     post:
       consumes:
       - application/json
