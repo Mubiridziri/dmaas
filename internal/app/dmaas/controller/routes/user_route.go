@@ -165,6 +165,11 @@ func (controller *UserController) detailUserAction(c *gin.Context) {
 
 	user, err := controller.Repository.GetUserById(id)
 
+	if err != nil {
+		response.CreateNotFoundResponse(c, "not found")
+		return
+	}
+
 	c.JSON(http.StatusOK, user)
 }
 

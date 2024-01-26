@@ -18,6 +18,7 @@ func ConnectAndMigrate(cfg *config.Config) (*gorm.DB, error) {
 	err = database.AutoMigrate(entity.Field{})
 	err = database.AutoMigrate(entity.Table{})
 	err = database.AutoMigrate(entity.Source{})
+	err = database.Create(&entity.User{Name: "admin", Username: "admin", Password: "admin"}).Error
 
 	//DATA WRAPPERS
 	err = database.Exec("CREATE EXTENSION IF NOT EXISTS postgres_fdw").Error

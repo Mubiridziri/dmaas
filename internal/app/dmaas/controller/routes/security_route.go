@@ -7,7 +7,6 @@ import (
 	"dmaas/internal/app/dmaas/repository"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 	"net/http"
 )
 
@@ -47,7 +46,7 @@ func (controller *SecurityController) LoginAction(c *gin.Context) {
 		return
 	}
 
-	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password)); err != nil {
+	if !user.IsPasswordCorrect(request.Password) {
 		response.CreateUnauthorizedResponse(c, "invalid credentials")
 		return
 	}

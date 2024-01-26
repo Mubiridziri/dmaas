@@ -14,7 +14,7 @@ import (
 
 type SourceController struct {
 	Repository    repository.SourceRepositoryInterface
-	SourceManager sources.SourceManager
+	SourceManager *sources.SourceManager
 }
 
 type SourceRequest struct {
@@ -220,6 +220,11 @@ func (controller *SourceController) detailSourceAction(c *gin.Context) {
 	}
 
 	source, err := controller.Repository.GetSourceById(id)
+
+	if err != nil {
+		response.CreateNotFoundResponse(c, "not found")
+		return
+	}
 
 	c.JSON(http.StatusOK, source)
 }

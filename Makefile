@@ -6,8 +6,8 @@ build: ## Build a version
 clean: ## Remove temporary files
 	go clean
 
-.PHONY: dev-start
-dev-start: ## Go Run
+.PHONY: dev
+dev: ## Go Run
 	export DATABASE_DSN="host=localhost user=postgres password=postgres dbname=app port=5432 sslmode=disable" && go run cmd/dmaas/main.go
 
 .PHONY: swag

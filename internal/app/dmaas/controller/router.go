@@ -44,7 +44,7 @@ func (router *Router) NewRouter() *gin.Engine {
 
 	//Init controllers
 	securityController := routes.SecurityController{Repository: router.UserRepository}
-	sourceController := routes.SourceController{Repository: router.SourceRepository}
+	sourceController := routes.SourceController{Repository: router.SourceRepository, SourceManager: router.SourceManager}
 	userController := routes.UserController{Repository: router.UserRepository}
 
 	//API
