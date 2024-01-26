@@ -21,14 +21,15 @@ type LoginRequest struct {
 
 // LoginAction GoDoc
 //
-//	@Summary	Login
-//	@Schemes
-//	@Description	Authorization with help username and password
-//	@Tags			v1
-//	@Accept			json
-//	@Produce		json
-//	@Success		200	{object}	LoginRequest
-//	@Router			/api/v1/login [POST]
+//		@Summary	Login
+//		@Schemes
+//		@Description	Authorization with help username and password
+//	 	@Param request body LoginRequest true "Username and password"
+//		@Tags			Security
+//		@Accept			json
+//		@Produce		json
+//		@Success		200	{object}	LoginRequest
+//		@Router			/api/v1/login [POST]
 func (controller SecurityController) LoginAction(c *gin.Context) {
 	session := sessions.Default(c)
 	var request LoginRequest
@@ -62,7 +63,7 @@ func (controller SecurityController) LoginAction(c *gin.Context) {
 //	@Summary	Logout
 //	@Schemes
 //	@Description	Logout from account
-//	@Tags			v1
+//	@Tags			Security
 //	@Accept			json
 //	@Produce		json
 //	@Success		200

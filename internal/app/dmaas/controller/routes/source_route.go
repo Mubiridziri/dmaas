@@ -49,8 +49,29 @@ func (model *SourceRequest) Validate() error {
 	return nil
 }
 
+// listSourcesAction GoDoc
+//
+//	@Summary	List Source
+//	@Schemes
+//	@Description	Paginated Source List
+//	@Tags			Sources
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{array}	entity.Source
+//	@Router			/api/v1/sources [GET]
 func (controller *SourceController) listSourcesAction(c *gin.Context) {}
 
+// createSourceAction GoDoc
+//
+//	@Summary	Create Source
+//	@Schemes
+//	@Description	Create entity
+//	@Param request body SourceRequest true "Source Data"
+//	@Tags			Sources
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	entity.Source
+//	@Router			/api/v1/sources [POST]
 func (controller *SourceController) createSourceAction(c *gin.Context) {
 	var request SourceRequest
 
@@ -89,10 +110,44 @@ func (controller *SourceController) createSourceAction(c *gin.Context) {
 
 }
 
+// editSourceAction GoDoc
+//
+//		@Summary	Update Source
+//		@Schemes
+//		@Description	Update entity
+//		@Tags			Sources
+//	 	@Param 	id  path  int true "Source ID"
+//		@Param request body SourceRequest true "Source Data"
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	entity.Source
+//	@Router			/api/v1/sources [PUT]
 func (controller *SourceController) editSourceAction(c *gin.Context) {}
 
+// detailSourceAction GoDoc
+//
+//		@Summary	Detail Source
+//		@Schemes
+//		@Description	Get By ID
+//		@Tags			Sources
+//	 	@Param 	id  path  int true "Source ID"
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	entity.Source
+//	@Router			/api/v1/sources [GET]
 func (controller *SourceController) detailSourceAction(c *gin.Context) {}
 
+// removeSourceAction GoDoc
+//
+//		@Summary	Remove Source
+//		@Schemes
+//		@Description	Remove By ID
+//		@Tags			Sources
+//	 	@Param 	id  path  int true "Source ID"
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	entity.Source
+//	@Router			/api/v1/sources [DELETE]
 func (controller *SourceController) removeSourceAction(c *gin.Context) {}
 
 func (controller *SourceController) AddSourceRoute(r *gin.RouterGroup) {
