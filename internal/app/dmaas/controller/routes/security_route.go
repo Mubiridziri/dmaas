@@ -3,6 +3,7 @@ package routes
 import (
 	"dmaas/internal/app/dmaas/controller/middleware"
 	"dmaas/internal/app/dmaas/controller/response"
+	"dmaas/internal/app/dmaas/entity"
 	"dmaas/internal/app/dmaas/repository"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -21,16 +22,16 @@ type LoginRequest struct {
 
 // LoginAction GoDoc
 //
-//		@Summary	Login
-//		@Schemes
-//		@Description	Authorization with help username and password
-//	 	@Param request body LoginRequest true "Username and password"
-//		@Tags			Security
-//		@Accept			json
-//		@Produce		json
-//		@Success		200	{object}	LoginRequest
-//		@Router			/api/v1/login [POST]
-func (controller SecurityController) LoginAction(c *gin.Context) {
+//	@Summary	Login
+//	@Schemes
+//	@Description	Authorization with help username and password
+//	@Param			request	body	LoginRequest	true	"Username and password"
+//	@Tags			Security
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	LoginRequest
+//	@Router			/api/v1/login [POST]
+func (controller *SecurityController) LoginAction(c *gin.Context) {
 	session := sessions.Default(c)
 	var request LoginRequest
 
@@ -42,12 +43,12 @@ func (controller SecurityController) LoginAction(c *gin.Context) {
 	user, err := controller.Repository.GetUserByUsername(request.Username)
 
 	if err != nil {
-		response.CreateUnauthorizedResponse(c, "Invalid credentials")
+		response.CreateUnauthorizedResponse(c, "invalid credentials")
 		return
 	}
 
 	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password)); err != nil {
-		response.CreateUnauthorizedResponse(c, "Invalid credentials")
+		response.CreateUnauthorizedResponse(c, "invalid credentials")
 		return
 	}
 
@@ -56,6 +57,11 @@ func (controller SecurityController) LoginAction(c *gin.Context) {
 
 	c.JSON(http.StatusAccepted, request)
 
+}
+
+func (controller *SecurityController) ProfileAction(c *gin.Context) {
+	user := c.MustGet("user").(entity.User)
+	c.JSON(http.StatusOK, user)
 }
 
 // LogoutAction GoDoc
@@ -68,14 +74,12 @@ func (controller SecurityController) LoginAction(c *gin.Context) {
 //	@Produce		json
 //	@Success		200
 //	@Router			/api/v1/logout [POST]
-func (controller SecurityController) LogoutAction(c *gin.Context) {
+func (controller *SecurityController) LogoutAction(c *gin.Context) {
 	session := sessions.Default(c)
 	session.Delete(middleware.UserKey)
 	err := session.Save()
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error": "Error save session!",
-		})
+		response.CreateInternalServerResponse(c, "error save session!")
 		return
 	}
 

@@ -26,7 +26,7 @@ type InformationSchemaColumn struct {
 // ImportDatabase only start in goroutine!
 func (manager *SourceManager) ImportDatabase(source entity.Source) {
 	localSchemaName, err := manager.createLocalSchema(source)
-	databaseDriver, err := manager.GetDriverByType(source.Type)
+	databaseDriver, err := manager.getDriverByType(source.Type)
 
 	if err != nil {
 		return
@@ -92,7 +92,7 @@ func (manager *SourceManager) getTableFields(tableName, localSchema string) ([]I
 }
 
 // GetDriverByType Choice driver by source type (planed: mysql, oracle, db2, linter, mssql, etc)
-func (manager *SourceManager) GetDriverByType(_type string) (driver.DriverInterface, error) {
+func (manager *SourceManager) getDriverByType(_type string) (driver.DriverInterface, error) {
 	switch _type {
 	case entity.PostgreSQLType:
 		return &postgresql.PostgreSQLDriver{DB: manager.DB}, nil

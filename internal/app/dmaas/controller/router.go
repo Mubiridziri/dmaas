@@ -38,9 +38,8 @@ func (router *Router) NewRouter() *gin.Engine {
 	docs.SwaggerInfo.Description = "Data management and analytic system"
 	docs.SwaggerInfo.Version = "1.0"
 	docs.SwaggerInfo.Host = "localhost:8080"
-	docs.SwaggerInfo.BasePath = "/v1"
+	docs.SwaggerInfo.BasePath = "/"
 	docs.SwaggerInfo.Schemes = []string{"http"}
-
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	//Init controllers
@@ -54,6 +53,7 @@ func (router *Router) NewRouter() *gin.Engine {
 
 	v1.Use(middleware.AuthRequired(router.UserRepository))
 	{
+		v1.GET("/login", securityController.ProfileAction)
 		v1.GET("/logout", securityController.LogoutAction)
 
 		userController.AddUserRoute(v1)

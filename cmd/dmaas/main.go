@@ -17,9 +17,9 @@ func init() {
 func main() {
 	flag.Parse()
 
-	a := dmaas.New(":" + bindAddr)
+	app := dmaas.New(":" + bindAddr)
 
-	if err := a.Run(); err != nil {
+	if err := app.Run(); err != nil {
 		log.Fatal(err)
 	}
 }

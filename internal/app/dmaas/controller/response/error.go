@@ -24,6 +24,10 @@ func CreateInternalServerResponse(c *gin.Context, text string) {
 	createResponse(c, http.StatusInternalServerError, text)
 }
 
+func CreateNotFoundResponse(c *gin.Context, text string) {
+	createResponse(c, http.StatusNotFound, text)
+}
+
 func createResponse(c *gin.Context, statusCode int, error string) {
 	c.AbortWithStatusJSON(statusCode, ErrorResponse{error})
 }

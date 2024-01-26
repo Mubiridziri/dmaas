@@ -7,14 +7,17 @@ clean: ## Remove temporary files
 	go clean
 
 .PHONY: dev-start
-dev-start:
+dev-start: ## Go Run
 	export DATABASE_DSN="host=localhost user=postgres password=postgres dbname=app port=5432 sslmode=disable" && go run cmd/dmaas/main.go
 
-.PHONY: swag # Update swagger.json
-swag:
+.PHONY: swag
+swag: ## Update swagger.json
 	swag init -g ./cmd/dmaas/main.go
 
-# Absolutely awesome: http://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
+.PHONY: swag-fmt
+swag-fmt: ## Formatter for GoDoc (Swagger)
+	swag fmt -g ./cmd/dmaas/main.go
+
 .PHONY: help
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

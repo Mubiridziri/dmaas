@@ -8,6 +8,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -54,19 +55,42 @@ func (model *SourceRequest) Validate() error {
 //	@Summary	List Source
 //	@Schemes
 //	@Description	Paginated Source List
+//	@Param			page	query	int	false	"Page"
+//	@Param			limit	query	int	false	"Page"
 //	@Tags			Sources
 //	@Accept			json
 //	@Produce		json
 //	@Success		200	{array}	entity.Source
 //	@Router			/api/v1/sources [GET]
-func (controller *SourceController) listSourcesAction(c *gin.Context) {}
+func (controller *SourceController) listSourcesAction(c *gin.Context) {
+	//TODO may be bind to model (struct) ?
+	pageQuery := c.DefaultQuery("page", "1")
+	limitQuery := c.DefaultQuery("page", "10")
+
+	page, pageOk := strconv.Atoi(pageQuery)
+	limit, limitOk := strconv.Atoi(limitQuery)
+
+	if pageOk != nil || limitOk != nil {
+		response.CreateBadRequestResponse(c, "bad query parameters")
+		return
+	}
+
+	entries, err := controller.Repository.ListSources(page, limit)
+
+	if err != nil {
+		response.CreateInternalServerResponse(c, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, entries)
+}
 
 // createSourceAction GoDoc
 //
 //	@Summary	Create Source
 //	@Schemes
 //	@Description	Create entity
-//	@Param request body SourceRequest true "Source Data"
+//	@Param			request	body	SourceRequest	true	"Source Data"
 //	@Tags			Sources
 //	@Accept			json
 //	@Produce		json
@@ -86,6 +110,7 @@ func (controller *SourceController) createSourceAction(c *gin.Context) {
 	}
 
 	//TODO MOVE TO .... ????
+	//boilerplate
 	source := entity.Source{
 		Title:    request.Title,
 		Name:     request.Name,
@@ -112,43 +137,124 @@ func (controller *SourceController) createSourceAction(c *gin.Context) {
 
 // editSourceAction GoDoc
 //
-//		@Summary	Update Source
-//		@Schemes
-//		@Description	Update entity
-//		@Tags			Sources
-//	 	@Param 	id  path  int true "Source ID"
-//		@Param request body SourceRequest true "Source Data"
+//	@Summary	Update Source
+//	@Schemes
+//	@Description	Update entity
+//	@Tags			Sources
+//	@Param			id		path	int				true	"Source ID"
+//	@Param			request	body	SourceRequest	true	"Source Data"
 //	@Accept			json
 //	@Produce		json
 //	@Success		200	{object}	entity.Source
-//	@Router			/api/v1/sources [PUT]
-func (controller *SourceController) editSourceAction(c *gin.Context) {}
+//	@Router			/api/v1/sources/:id [PUT]
+func (controller *SourceController) editSourceAction(c *gin.Context) {
+	idParam := c.Param("id")
+
+	id, err := strconv.Atoi(idParam)
+
+	if err != nil {
+		response.CreateNotFoundResponse(c, "invalid ID param")
+		return
+	}
+
+	source, err := controller.Repository.GetSourceById(id)
+
+	if err != nil {
+		response.CreateNotFoundResponse(c, "invalid ID param")
+		return
+	}
+
+	var request SourceRequest
+
+	if err := c.BindJSON(&request); err != nil {
+		response.CreateBadRequestResponse(c, err.Error())
+		return
+	}
+
+	if err := request.Validate(); err != nil {
+		response.CreateBadRequestResponse(c, err.Error())
+		return
+	}
+
+	//TODO Refact?? need object to populate method
+	//boilerplate
+	source.Title = request.Title
+	source.Name = request.Name
+	source.Type = request.Type
+	source.Host = request.Host
+	source.Port = request.Port
+	source.Username = request.Username
+	source.Password = request.Password
+	source.Schema = request.Schema
+
+	err = controller.Repository.UpdateSource(&source)
+
+	if err != nil {
+		response.CreateInternalServerResponse(c, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, source)
+
+}
 
 // detailSourceAction GoDoc
 //
-//		@Summary	Detail Source
-//		@Schemes
-//		@Description	Get By ID
-//		@Tags			Sources
-//	 	@Param 	id  path  int true "Source ID"
+//	@Summary	Detail Source
+//	@Schemes
+//	@Description	Get By ID
+//	@Tags			Sources
+//	@Param			id	path	int	true	"Source ID"
 //	@Accept			json
 //	@Produce		json
 //	@Success		200	{object}	entity.Source
-//	@Router			/api/v1/sources [GET]
-func (controller *SourceController) detailSourceAction(c *gin.Context) {}
+//	@Router			/api/v1/sources/:id [GET]
+func (controller *SourceController) detailSourceAction(c *gin.Context) {
+	idParam := c.Param("id")
+
+	id, err := strconv.Atoi(idParam)
+
+	if err != nil {
+		response.CreateNotFoundResponse(c, "invalid ID param")
+		return
+	}
+
+	source, err := controller.Repository.GetSourceById(id)
+
+	c.JSON(http.StatusOK, source)
+}
 
 // removeSourceAction GoDoc
 //
-//		@Summary	Remove Source
-//		@Schemes
-//		@Description	Remove By ID
-//		@Tags			Sources
-//	 	@Param 	id  path  int true "Source ID"
+//	@Summary	Remove Source
+//	@Schemes
+//	@Description	Remove By ID
+//	@Tags			Sources
+//	@Param			id	path	int	true	"Source ID"
 //	@Accept			json
 //	@Produce		json
 //	@Success		200	{object}	entity.Source
-//	@Router			/api/v1/sources [DELETE]
-func (controller *SourceController) removeSourceAction(c *gin.Context) {}
+//	@Router			/api/v1/sources/:id [DELETE]
+func (controller *SourceController) removeSourceAction(c *gin.Context) {
+	idParam := c.Param("id")
+
+	id, err := strconv.Atoi(idParam)
+
+	if err != nil {
+		response.CreateNotFoundResponse(c, "invalid ID param")
+		return
+	}
+
+	source, err := controller.Repository.GetSourceById(id)
+	err = controller.Repository.RemoveSource(&source)
+
+	if err != nil {
+		response.CreateInternalServerResponse(c, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, source)
+}
 
 func (controller *SourceController) AddSourceRoute(r *gin.RouterGroup) {
 	userGroup := r.Group("/sources")
