@@ -123,7 +123,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/entity.Source"
+                                "$ref": "#/definitions/routes.PaginatedSources"
                             }
                         }
                     }
@@ -303,7 +303,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/entity.Table"
+                                "$ref": "#/definitions/routes.PaginatedTables"
                             }
                         }
                     }
@@ -357,7 +357,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/entity.Table"
+                                "$ref": "#/definitions/routes.PaginatedTablesData"
                             }
                         }
                     }
@@ -397,7 +397,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/entity.User"
+                                "$ref": "#/definitions/routes.PaginatedUsers"
                             }
                         }
                     }
@@ -634,6 +634,63 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "routes.PaginatedSources": {
+            "type": "object",
+            "properties": {
+                "entries": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.Source"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "routes.PaginatedTables": {
+            "type": "object",
+            "properties": {
+                "entries": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.Table"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "routes.PaginatedTablesData": {
+            "type": "object",
+            "properties": {
+                "entries": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "routes.PaginatedUsers": {
+            "type": "object",
+            "properties": {
+                "entries": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.User"
+                    }
+                },
+                "total": {
+                    "type": "integer"
                 }
             }
         },

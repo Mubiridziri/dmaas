@@ -8,6 +8,7 @@ import (
 type TableRepositoryInterface interface {
 	ListTables(sourceId int, page, limit int) ([]entity.Table, error)
 	GetTableById(id int) (entity.Table, error)
+	GetCount() int64
 }
 
 type TableRepository struct {
@@ -38,4 +39,10 @@ func (repository *TableRepository) GetTableById(id int) (entity.Table, error) {
 	}
 
 	return table, nil
+}
+
+func (repository *TableRepository) GetCount() int64 {
+	var count int64
+	repository.DB.Model(&entity.Table{}).Count(&count)
+	return count
 }

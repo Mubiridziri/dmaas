@@ -63,6 +63,43 @@ definitions:
       username:
         type: string
     type: object
+  routes.PaginatedSources:
+    properties:
+      entries:
+        items:
+          $ref: '#/definitions/entity.Source'
+        type: array
+      total:
+        type: integer
+    type: object
+  routes.PaginatedTables:
+    properties:
+      entries:
+        items:
+          $ref: '#/definitions/entity.Table'
+        type: array
+      total:
+        type: integer
+    type: object
+  routes.PaginatedTablesData:
+    properties:
+      entries:
+        items:
+          additionalProperties: true
+          type: object
+        type: array
+      total:
+        type: integer
+    type: object
+  routes.PaginatedUsers:
+    properties:
+      entries:
+        items:
+          $ref: '#/definitions/entity.User'
+        type: array
+      total:
+        type: integer
+    type: object
   routes.SourceRequest:
     properties:
       host:
@@ -173,7 +210,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/entity.Source'
+              $ref: '#/definitions/routes.PaginatedSources'
             type: array
       summary: List Source
       tags:
@@ -292,7 +329,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/entity.Table'
+              $ref: '#/definitions/routes.PaginatedTables'
             type: array
       summary: List Table
       tags:
@@ -328,7 +365,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/entity.Table'
+              $ref: '#/definitions/routes.PaginatedTablesData'
             type: array
       summary: List Table Data
       tags:
@@ -354,7 +391,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/entity.User'
+              $ref: '#/definitions/routes.PaginatedUsers'
             type: array
       summary: List User
       tags:

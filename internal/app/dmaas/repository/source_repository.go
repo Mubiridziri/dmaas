@@ -11,6 +11,7 @@ type SourceRepositoryInterface interface {
 	RemoveSource(source *entity.Source) error
 	ListSources(page, limit int) ([]entity.Source, error)
 	GetSourceById(id int) (entity.Source, error)
+	GetCount() int64
 }
 
 type SourceRepository struct {
@@ -50,4 +51,10 @@ func (repository *SourceRepository) GetSourceById(id int) (entity.Source, error)
 	}
 
 	return source, nil
+}
+
+func (repository *SourceRepository) GetCount() int64 {
+	var count int64
+	repository.DB.Model(&entity.Source{}).Count(&count)
+	return count
 }

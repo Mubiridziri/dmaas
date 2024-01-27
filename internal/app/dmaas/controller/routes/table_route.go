@@ -2,6 +2,7 @@ package routes
 
 import (
 	"dmaas/internal/app/dmaas/controller/response"
+	"dmaas/internal/app/dmaas/entity"
 	"dmaas/internal/app/dmaas/repository"
 	sources "dmaas/internal/app/dmaas/service"
 	"github.com/gin-gonic/gin"
@@ -16,6 +17,16 @@ type TableController struct {
 	SourceManager       *sources.SourceManager
 }
 
+type PaginatedTables struct {
+	Total   int64          `json:"total"`
+	Entries []entity.Table `json:"entries"`
+}
+
+type PaginatedTablesData struct {
+	Total   int64                    `json:"total"`
+	Entries []map[string]interface{} `json:"entries"`
+}
+
 // listTablesAction GoDoc
 //
 //	@Summary	List Table
@@ -27,7 +38,7 @@ type TableController struct {
 //	@Tags			Sources
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{array}	entity.Table
+//	@Success		200	{array}	PaginatedTables
 //	@Router			/api/v1/sources/:id/tables [GET]
 func (controller *TableController) listTablesAction(c *gin.Context) {
 	idParam := c.Param("id")
@@ -36,7 +47,7 @@ func (controller *TableController) listTablesAction(c *gin.Context) {
 
 	//TODO may be bind to model (struct) ?
 	pageQuery := c.DefaultQuery("page", "1")
-	limitQuery := c.DefaultQuery("page", "10")
+	limitQuery := c.DefaultQuery("limit", "10")
 
 	page, pageOk := strconv.Atoi(pageQuery)
 	limit, limitOk := strconv.Atoi(limitQuery)
@@ -47,13 +58,17 @@ func (controller *TableController) listTablesAction(c *gin.Context) {
 	}
 
 	entries, err := controller.TableRepository.ListTables(sourceId, page, limit)
+	count := controller.TableRepository.GetCount()
 
 	if err != nil {
 		response.CreateInternalServerResponse(c, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, entries)
+	c.JSON(http.StatusOK, PaginatedTables{
+		Total:   count,
+		Entries: entries,
+	})
 }
 
 // listTablesAction GoDoc
@@ -68,7 +83,7 @@ func (controller *TableController) listTablesAction(c *gin.Context) {
 //	@Tags			Sources
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{array}	entity.Table
+//	@Success		200	{array}	PaginatedTablesData
 //	@Router			/api/v1/sources/table/data/:id [GET]
 func (controller *TableController) listTableDataAction(c *gin.Context) {
 	idParam := c.Param("id")
@@ -104,13 +119,17 @@ func (controller *TableController) listTableDataAction(c *gin.Context) {
 	localSchemaName := controller.SourceManager.GetLocalSchemaName(source)
 
 	data, err := controller.TableDataRepository.ListTableData(localSchemaName, table, page, limit)
+	count := controller.TableDataRepository.GetCount(localSchemaName, table)
 
 	if err != nil {
 		response.CreateInternalServerResponse(c, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, data)
+	c.JSON(http.StatusOK, PaginatedTablesData{
+		Total:   count,
+		Entries: data,
+	})
 }
 
 func (controller *TableController) AddTableRoute(r *gin.RouterGroup) {

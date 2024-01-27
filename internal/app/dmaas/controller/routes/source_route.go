@@ -28,6 +28,11 @@ type SourceRequest struct {
 	Schema   string `json:"schema" binding:"required"`
 }
 
+type PaginatedSources struct {
+	Total   int64           `json:"total"`
+	Entries []entity.Source `json:"entries"`
+}
+
 // Validate TODO MOVE TO .... ???
 func (model *SourceRequest) Validate() error {
 	if strings.Contains(model.Name, ";") {
@@ -60,12 +65,12 @@ func (model *SourceRequest) Validate() error {
 //	@Tags			Sources
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{array}	entity.Source
+//	@Success		200	{array}	PaginatedSources
 //	@Router			/api/v1/sources [GET]
 func (controller *SourceController) listSourcesAction(c *gin.Context) {
 	//TODO may be bind to model (struct) ?
 	pageQuery := c.DefaultQuery("page", "1")
-	limitQuery := c.DefaultQuery("page", "10")
+	limitQuery := c.DefaultQuery("limit", "10")
 
 	page, pageOk := strconv.Atoi(pageQuery)
 	limit, limitOk := strconv.Atoi(limitQuery)
@@ -76,13 +81,17 @@ func (controller *SourceController) listSourcesAction(c *gin.Context) {
 	}
 
 	entries, err := controller.Repository.ListSources(page, limit)
+	count := controller.Repository.GetCount()
 
 	if err != nil {
 		response.CreateInternalServerResponse(c, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, entries)
+	c.JSON(http.StatusOK, PaginatedSources{
+		Total:   count,
+		Entries: entries,
+	})
 }
 
 // createSourceAction GoDoc

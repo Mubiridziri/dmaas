@@ -19,6 +19,11 @@ type UserRequest struct {
 	Password string `json:"password"`
 }
 
+type PaginatedUsers struct {
+	Total   int64         `json:"total"`
+	Entries []entity.User `json:"entries"`
+}
+
 // listUsersAction GoDoc
 //
 //	@Summary	List User
@@ -29,12 +34,12 @@ type UserRequest struct {
 //	@Tags			Users
 //	@Accept			json
 //	@Produce		json
-//	@Success		200	{array}	entity.User
+//	@Success		200	{array}	PaginatedUsers
 //	@Router			/api/v1/users [GET]
 func (controller *UserController) listUsersAction(c *gin.Context) {
 	//TODO may be bind to model (struct) ?
 	pageQuery := c.DefaultQuery("page", "1")
-	limitQuery := c.DefaultQuery("page", "10")
+	limitQuery := c.DefaultQuery("limit", "10")
 
 	page, pageOk := strconv.Atoi(pageQuery)
 	limit, limitOk := strconv.Atoi(limitQuery)
@@ -45,13 +50,17 @@ func (controller *UserController) listUsersAction(c *gin.Context) {
 	}
 
 	entries, err := controller.Repository.ListUsers(page, limit)
+	count := controller.Repository.GetCount()
 
 	if err != nil {
 		response.CreateInternalServerResponse(c, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, entries)
+	c.JSON(http.StatusOK, PaginatedUsers{
+		Total:   count,
+		Entries: entries,
+	})
 }
 
 // createUserAction GoDoc

@@ -12,6 +12,7 @@ type UserRepositoryInterface interface {
 	ListUsers(page, limit int) ([]entity.User, error)
 	GetUserById(id int) (entity.User, error)
 	GetUserByUsername(username string) (entity.User, error)
+	GetCount() int64
 }
 
 type UserRepository struct {
@@ -56,4 +57,10 @@ func (repository *UserRepository) ListUsers(page, limit int) ([]entity.User, err
 	}
 
 	return users, nil
+}
+
+func (repository *UserRepository) GetCount() int64 {
+	var count int64
+	repository.DB.Model(&entity.User{}).Count(&count)
+	return count
 }
