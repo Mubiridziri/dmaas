@@ -26,10 +26,9 @@ docker-up: ## Start Docker-Compose Container with app & database
 docker-down: ## Down Docker-Compose Containers
 	docker-compose -f build/docker-compose.yml down
 
-
 .PHONY: docker-database-up
 docker-database-up: ## Start Docker-compose Container with only database service
-	docker-compose -f build/docker-compose.yml up datbase -d
+	docker-compose -f build/docker-compose.yml up database -d
 
 .PHONY: help
 help:

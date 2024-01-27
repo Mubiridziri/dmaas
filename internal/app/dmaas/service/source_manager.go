@@ -73,9 +73,13 @@ func (manager *SourceManager) importStructure(source entity.Source, localSchemaN
 }
 
 func (manager *SourceManager) createLocalSchema(source entity.Source) (string, error) {
-	schemaName := fmt.Sprintf("import_schema_%v", source.ID)
+	schemaName := manager.GetLocalSchemaName(source)
 	sql := fmt.Sprintf("CREATE SCHEMA IF NOT EXISTS %v", schemaName)
 	return schemaName, manager.DB.Exec(sql).Error
+}
+
+func (manager *SourceManager) GetLocalSchemaName(source entity.Source) string {
+	return fmt.Sprintf("import_schema_%v", source.ID)
 }
 
 func (manager *SourceManager) getTables(localSchemaName string) ([]InformationSchemaTable, error) {

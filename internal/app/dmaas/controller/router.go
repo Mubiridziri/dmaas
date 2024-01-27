@@ -18,8 +18,10 @@ var secret = []byte("RHYaxoa6iqb1VTCsFtdM2PAAu8i8CYhU")
 
 type Router struct {
 	//Repositories
-	SourceRepository repository.SourceRepositoryInterface
-	UserRepository   repository.UserRepositoryInterface
+	SourceRepository    repository.SourceRepositoryInterface
+	UserRepository      repository.UserRepositoryInterface
+	TableRepository     repository.TableRepositoryInterface
+	TableDataRepository repository.TableDataRepositoryInterface
 
 	//Services
 	SourceManager *sources.SourceManager
@@ -46,6 +48,12 @@ func (router *Router) NewRouter() *gin.Engine {
 	securityController := routes.SecurityController{Repository: router.UserRepository}
 	sourceController := routes.SourceController{Repository: router.SourceRepository, SourceManager: router.SourceManager}
 	userController := routes.UserController{Repository: router.UserRepository}
+	tableController := routes.TableController{
+		TableRepository:     router.TableRepository,
+		TableDataRepository: router.TableDataRepository,
+		SourceRepository:    router.SourceRepository,
+		SourceManager:       router.SourceManager,
+	}
 
 	//API
 	v1 := r.Group("/api/v1")
@@ -58,6 +66,7 @@ func (router *Router) NewRouter() *gin.Engine {
 
 		userController.AddUserRoute(v1)
 		sourceController.AddSourceRoute(v1)
+		tableController.AddTableRoute(v1)
 	}
 
 	return r

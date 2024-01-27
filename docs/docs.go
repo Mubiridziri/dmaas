@@ -263,6 +263,107 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/sources/:id/tables": {
+            "get": {
+                "description": "Paginated Table List",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sources"
+                ],
+                "summary": "List Table",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "SourceID",
+                        "name": "sourceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Table"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sources/table/data/:id": {
+            "get": {
+                "description": "Paginated Table List",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sources"
+                ],
+                "summary": "List Table Data",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "SourceID",
+                        "name": "sourceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "TableID",
+                        "name": "sourceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entity.Table"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/users": {
             "get": {
                 "description": "Paginated User List",
@@ -476,12 +577,6 @@ const docTemplate = `{
                 "schema": {
                     "type": "string"
                 },
-                "tables": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/entity.Table"
-                    }
-                },
                 "title": {
                     "type": "string"
                 },
@@ -502,6 +597,9 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/entity.Field"
                     }
+                },
+                "id": {
+                    "type": "integer"
                 },
                 "name": {
                     "type": "string"

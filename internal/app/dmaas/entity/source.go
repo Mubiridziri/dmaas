@@ -13,5 +13,5 @@ type Source struct {
 	Password string  `json:"-"`
 	Schema   string  `json:"schema"`
 	Alive    bool    `json:"alive"`
-	Tables   []Table `json:"tables"`
+	Tables   []Table `json:"-"`
 }

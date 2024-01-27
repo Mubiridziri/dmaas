@@ -24,10 +24,6 @@ definitions:
         type: integer
       schema:
         type: string
-      tables:
-        items:
-          $ref: '#/definitions/entity.Table'
-        type: array
       title:
         type: string
       type:
@@ -42,6 +38,8 @@ definitions:
         items:
           $ref: '#/definitions/entity.Field'
         type: array
+      id:
+        type: integer
       name:
         type: string
     type: object
@@ -266,6 +264,73 @@ paths:
           schema:
             $ref: '#/definitions/entity.Source'
       summary: Update Source
+      tags:
+      - Sources
+  /api/v1/sources/:id/tables:
+    get:
+      consumes:
+      - application/json
+      description: Paginated Table List
+      parameters:
+      - description: SourceID
+        in: path
+        name: sourceId
+        required: true
+        type: integer
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Table'
+            type: array
+      summary: List Table
+      tags:
+      - Sources
+  /api/v1/sources/table/data/:id:
+    get:
+      consumes:
+      - application/json
+      description: Paginated Table List
+      parameters:
+      - description: SourceID
+        in: path
+        name: sourceId
+        required: true
+        type: integer
+      - description: TableID
+        in: path
+        name: sourceId
+        required: true
+        type: integer
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Table'
+            type: array
+      summary: List Table Data
       tags:
       - Sources
   /api/v1/users:

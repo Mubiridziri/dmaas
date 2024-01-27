@@ -30,8 +30,10 @@ func (application *Application) Run() error {
 
 	router := controller.Router{
 		//Repositories
-		SourceRepository: &repository.SourceRepository{DB: db},
-		UserRepository:   &repository.UserRepository{DB: db},
+		SourceRepository:    &repository.SourceRepository{DB: db},
+		UserRepository:      &repository.UserRepository{DB: db},
+		TableRepository:     &repository.TableRepository{DB: db},
+		TableDataRepository: &repository.TableDataRepository{DB: db},
 		//Services
 		SourceManager: &sources.SourceManager{DB: db},
 	}
