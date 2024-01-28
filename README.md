@@ -73,3 +73,12 @@ docker-up                      Start Docker-Compose Container with app & databas
 docker-down                    Down Docker-Compose Containers
 docker-database-up             Start Docker-compose Container with only database service
 ```
+
+## Планы после MVP
+
+1. Расширенная поддержка разных СУБД (MySQL, Oracle, MSSQL в приоритете)
+2. Поддержка импорта загрузки данных со сторонних API (JSON) и применения их в датасетах
+2. Поддержка развертывания и масштабирования в Kubernetes
+3. Поддержка загрузки и импорта данных из файлов (по URL, ручной загрузке) и применения их в датасетах
+4. Поддержка загрузки, обработки и импорта Геоданных (GeoJSON) и применения их в датасетах
+5. Поддержка определения изменений и уведомление об изменениях внешних источников 
