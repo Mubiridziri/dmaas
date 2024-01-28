@@ -1,5 +1,6 @@
 .PHONY: build
 build: ## Build a version
+	make swag
 	go build -v ./cmd/dmaas
 
 .PHONY: clean
