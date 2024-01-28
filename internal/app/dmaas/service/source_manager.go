@@ -45,6 +45,19 @@ func (manager *SourceManager) ImportDatabase(source entity.Source) {
 	}
 }
 
+func (manager *SourceManager) DeleteDatabase(source entity.Source) {
+	databaseDriver, err := manager.getDriverByType(source.Type)
+	if err != nil {
+		return
+	}
+	_ = databaseDriver.DropForeignServer(source)
+	_ = manager.dropLocalSchema(source)
+}
+
+func (manager *SourceManager) GetLocalSchemaName(source entity.Source) string {
+	return fmt.Sprintf("import_schema_%v", source.ID)
+}
+
 func (manager *SourceManager) importStructure(source entity.Source, localSchemaName string) error {
 	tables, err := manager.getTables(localSchemaName)
 
@@ -78,8 +91,10 @@ func (manager *SourceManager) createLocalSchema(source entity.Source) (string, e
 	return schemaName, manager.DB.Exec(sql).Error
 }
 
-func (manager *SourceManager) GetLocalSchemaName(source entity.Source) string {
-	return fmt.Sprintf("import_schema_%v", source.ID)
+func (manager *SourceManager) dropLocalSchema(source entity.Source) error {
+	schemaName := manager.GetLocalSchemaName(source)
+	sql := fmt.Sprintf("DROP SCHEMA IF EXISTS %v", schemaName)
+	return manager.DB.Exec(sql).Error
 }
 
 func (manager *SourceManager) getTables(localSchemaName string) ([]InformationSchemaTable, error) {
@@ -95,7 +110,7 @@ func (manager *SourceManager) getTableFields(tableName, localSchema string) ([]I
 	return fields, manager.DB.Raw(sql).Scan(&fields).Error
 }
 
-// GetDriverByType Choice driver by source type (planed: mysql, oracle, db2, linter, mssql, etc)
+// GetDriverByType Choice driver by source type (planed: mysql, oracle, db2, linter, mssql, etc.)
 func (manager *SourceManager) getDriverByType(_type string) (driver.DriverInterface, error) {
 	switch _type {
 	case entity.PostgreSQLType:

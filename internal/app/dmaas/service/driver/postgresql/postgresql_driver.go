@@ -22,6 +22,12 @@ func (driver *PostgreSQLDriver) ImportDatabase(source entity.Source, localSchema
 	return err
 }
 
+func (driver *PostgreSQLDriver) DropForeignServer(source entity.Source) error {
+	serverName := driver.generateServerName(source)
+	sql := fmt.Sprintf("DROP SERVER IF EXISTS %v CASCADE", serverName)
+	return driver.DB.Exec(sql).Error
+}
+
 func (driver *PostgreSQLDriver) createForeignServer(serverName string, source entity.Source) error {
 	sql := fmt.Sprintf("CREATE SERVER IF NOT EXISTS %v "+
 		"FOREIGN DATA WRAPPER %v "+

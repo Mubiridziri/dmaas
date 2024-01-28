@@ -1,4 +1,4 @@
-package routes
+package v1
 
 import (
 	"dmaas/internal/app/dmaas/controller/response"
@@ -7,6 +7,7 @@ import (
 	"dmaas/internal/app/dmaas/service"
 	"errors"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"net/http"
 	"strconv"
 	"strings"
@@ -260,12 +261,20 @@ func (controller *SourceController) removeSourceAction(c *gin.Context) {
 	}
 
 	source, err := controller.Repository.GetSourceById(id)
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		response.CreateNotFoundResponse(c, "not found")
+		return
+	}
+
 	err = controller.Repository.RemoveSource(&source)
 
 	if err != nil {
 		response.CreateInternalServerResponse(c, err.Error())
 		return
 	}
+
+	go controller.SourceManager.DeleteDatabase(source)
 
 	c.JSON(http.StatusOK, source)
 }

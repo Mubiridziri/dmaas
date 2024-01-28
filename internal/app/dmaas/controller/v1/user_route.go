@@ -1,4 +1,4 @@
-package routes
+package v1
 
 import (
 	"dmaas/internal/app/dmaas/controller/response"
