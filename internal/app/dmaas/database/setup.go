@@ -15,9 +15,16 @@ func ConnectAndMigrate(cfg *config.Config) (*gorm.DB, error) {
 	}
 
 	err = database.AutoMigrate(entity.User{})
+	//Sources
 	err = database.AutoMigrate(entity.Field{})
 	err = database.AutoMigrate(entity.Table{})
 	err = database.AutoMigrate(entity.Source{})
+	//Dictionaries
+	err = database.AutoMigrate(entity.DictionaryValue{})
+	err = database.AutoMigrate(entity.DictionaryRow{})
+	err = database.AutoMigrate(entity.DictionaryField{})
+	err = database.AutoMigrate(entity.Dictionary{})
+
 	err = database.Create(&entity.User{Name: "admin", Username: "admin", Password: "admin"}).Error
 
 	//DATA WRAPPERS

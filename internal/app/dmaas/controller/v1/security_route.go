@@ -1,17 +1,17 @@
 package v1
 
 import (
+	"dmaas/internal/app/dmaas/context"
 	"dmaas/internal/app/dmaas/controller/middleware"
 	"dmaas/internal/app/dmaas/controller/response"
 	"dmaas/internal/app/dmaas/entity"
-	"dmaas/internal/app/dmaas/repository"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 type SecurityController struct {
-	Repository repository.UserRepositoryInterface
+	Context *context.ApplicationContext
 }
 
 type LoginRequest struct {
@@ -39,7 +39,7 @@ func (controller *SecurityController) LoginAction(c *gin.Context) {
 		return
 	}
 
-	user, err := controller.Repository.GetUserByUsername(request.Username)
+	user, err := controller.Context.UserUseCase.GetUserByUsername(request.Username)
 
 	if err != nil {
 		response.CreateUnauthorizedResponse(c, "invalid credentials")
@@ -54,7 +54,7 @@ func (controller *SecurityController) LoginAction(c *gin.Context) {
 	session.Set(middleware.UserKey, request.Username)
 	_ = session.Save()
 
-	c.JSON(http.StatusAccepted, request)
+	c.JSON(http.StatusOK, request)
 
 }
 

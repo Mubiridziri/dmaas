@@ -2,10 +2,9 @@ package controller
 
 import (
 	"dmaas/docs"
+	"dmaas/internal/app/dmaas/context"
 	"dmaas/internal/app/dmaas/controller/middleware"
 	"dmaas/internal/app/dmaas/controller/v1"
-	"dmaas/internal/app/dmaas/repository"
-	sources "dmaas/internal/app/dmaas/service"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
@@ -18,14 +17,7 @@ import (
 var secret = []byte("RHYaxoa6iqb1VTCsFtdM2PAAu8i8CYhU")
 
 type Router struct {
-	//Repositories
-	SourceRepository    repository.SourceRepositoryInterface
-	UserRepository      repository.UserRepositoryInterface
-	TableRepository     repository.TableRepositoryInterface
-	TableDataRepository repository.TableDataRepositoryInterface
-
-	//Services
-	SourceManager *sources.SourceManager
+	Context *context.ApplicationContext
 }
 
 func (router *Router) NewRouter() *gin.Engine {
@@ -40,15 +32,11 @@ func (router *Router) NewRouter() *gin.Engine {
 	configureSwagger(r)
 
 	//Init controllers
-	securityController := v1.SecurityController{Repository: router.UserRepository}
-	sourceController := v1.SourceController{Repository: router.SourceRepository, SourceManager: router.SourceManager}
-	userController := v1.UserController{Repository: router.UserRepository}
-	tableController := v1.TableController{
-		TableRepository:     router.TableRepository,
-		TableDataRepository: router.TableDataRepository,
-		SourceRepository:    router.SourceRepository,
-		SourceManager:       router.SourceManager,
-	}
+	securityController := v1.SecurityController{Context: router.Context}
+	sourceController := v1.SourceController{Context: router.Context}
+	userController := v1.UserController{Context: router.Context}
+	tableController := v1.TableController{Context: router.Context}
+	dictionaryController := v1.DictionaryController{Context: router.Context}
 
 	// K8s probe
 	r.GET("/healthz", func(c *gin.Context) { c.Status(http.StatusOK) })
@@ -57,7 +45,7 @@ func (router *Router) NewRouter() *gin.Engine {
 	mainGroup := r.Group("/api/v1")
 	mainGroup.POST("/login", securityController.LoginAction)
 
-	mainGroup.Use(middleware.AuthRequired(router.UserRepository))
+	mainGroup.Use(middleware.AuthRequired(router.Context))
 	{
 		mainGroup.GET("/login", securityController.ProfileAction)
 		mainGroup.GET("/logout", securityController.LogoutAction)
@@ -65,6 +53,7 @@ func (router *Router) NewRouter() *gin.Engine {
 		userController.AddUserRoute(mainGroup)
 		sourceController.AddSourceRoute(mainGroup)
 		tableController.AddTableRoute(mainGroup)
+		dictionaryController.AddDictionaryRoute(mainGroup)
 	}
 
 	return r

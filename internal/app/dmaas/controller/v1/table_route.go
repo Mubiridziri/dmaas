@@ -1,20 +1,16 @@
 package v1
 
 import (
+	"dmaas/internal/app/dmaas/context"
 	"dmaas/internal/app/dmaas/controller/response"
+	"dmaas/internal/app/dmaas/dto"
 	"dmaas/internal/app/dmaas/entity"
-	"dmaas/internal/app/dmaas/repository"
-	sources "dmaas/internal/app/dmaas/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strconv"
 )
 
 type TableController struct {
-	TableRepository     repository.TableRepositoryInterface
-	TableDataRepository repository.TableDataRepositoryInterface
-	SourceRepository    repository.SourceRepositoryInterface
-	SourceManager       *sources.SourceManager
+	Context *context.ApplicationContext
 }
 
 type PaginatedTables struct {
@@ -34,31 +30,27 @@ type PaginatedTablesData struct {
 //	@Description	Paginated Table List
 //	@Param			sourceId	path	int	true	"SourceID"
 //	@Param			page	query	int	false	"Page"
-//	@Param			limit	query	int	false	"Page"
+//	@Param			limit	query	int	false	"Limit"
 //	@Tags			Sources
 //	@Accept			json
 //	@Produce		json
 //	@Success		200	{array}	PaginatedTables
 //	@Router			/api/v1/sources/:id/tables [GET]
 func (controller *TableController) listTablesAction(c *gin.Context) {
-	idParam := c.Param("id")
+	sourceId, err := dto.IdFromContext(c)
 
-	sourceId, err := strconv.Atoi(idParam)
-
-	//TODO may be bind to model (struct) ?
-	pageQuery := c.DefaultQuery("page", "1")
-	limitQuery := c.DefaultQuery("limit", "10")
-
-	page, pageOk := strconv.Atoi(pageQuery)
-	limit, limitOk := strconv.Atoi(limitQuery)
-
-	if pageOk != nil || limitOk != nil {
-		response.CreateBadRequestResponse(c, "bad query parameters")
-		return
+	if err != nil {
+		response.CreateBadRequestResponse(c, err.Error())
 	}
 
-	entries, err := controller.TableRepository.ListTables(sourceId, page, limit)
-	count := controller.TableRepository.GetCount()
+	pagination, err := dto.QueryFromContext(c)
+
+	if err != nil {
+		response.CreateBadRequestResponse(c, err.Error())
+	}
+
+	entries, err := controller.Context.TableUseCase.ListTables(sourceId, pagination)
+	count := controller.Context.TableUseCase.GetCount()
 
 	if err != nil {
 		response.CreateInternalServerResponse(c, err.Error())
@@ -86,40 +78,34 @@ func (controller *TableController) listTablesAction(c *gin.Context) {
 //	@Success		200	{array}	PaginatedTablesData
 //	@Router			/api/v1/sources/table/data/:id [GET]
 func (controller *TableController) listTableDataAction(c *gin.Context) {
-	idParam := c.Param("id")
+	tableId, err := dto.IdFromContext(c)
 
-	tableId, err := strconv.Atoi(idParam)
-
-	//TODO may be bind to model (struct) ?
-	pageQuery := c.DefaultQuery("page", "1")
-	limitQuery := c.DefaultQuery("page", "10")
-
-	page, pageOk := strconv.Atoi(pageQuery)
-	limit, limitOk := strconv.Atoi(limitQuery)
-
-	if pageOk != nil || limitOk != nil {
-		response.CreateBadRequestResponse(c, "bad query parameters")
-		return
+	if err != nil {
+		response.CreateBadRequestResponse(c, err.Error())
 	}
 
-	table, err := controller.TableRepository.GetTableById(tableId)
+	pagination, err := dto.QueryFromContext(c)
+
+	if err != nil {
+		response.CreateBadRequestResponse(c, err.Error())
+	}
+
+	table, err := controller.Context.TableUseCase.GetTableById(tableId)
 
 	if err != nil {
 		response.CreateNotFoundResponse(c, "not found")
 		return
 	}
 
-	source, err := controller.SourceRepository.GetSourceById(table.SourceID)
+	source, err := controller.Context.SourceUseCase.GetSourceById(table.SourceID)
 
 	if err != nil {
 		response.CreateNotFoundResponse(c, "not found")
 		return
 	}
 
-	localSchemaName := controller.SourceManager.GetLocalSchemaName(source)
-
-	data, err := controller.TableDataRepository.ListTableData(localSchemaName, table, page, limit)
-	count := controller.TableDataRepository.GetCount(localSchemaName, table)
+	data, err := controller.Context.TableDataUseCase.ListTableData(source, table, pagination)
+	count := controller.Context.TableDataUseCase.GetCount(source, table)
 
 	if err != nil {
 		response.CreateInternalServerResponse(c, err.Error())

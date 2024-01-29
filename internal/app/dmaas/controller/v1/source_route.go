@@ -1,59 +1,23 @@
 package v1
 
 import (
+	"dmaas/internal/app/dmaas/context"
 	"dmaas/internal/app/dmaas/controller/response"
+	"dmaas/internal/app/dmaas/dto"
 	"dmaas/internal/app/dmaas/entity"
-	"dmaas/internal/app/dmaas/repository"
-	"dmaas/internal/app/dmaas/service"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"net/http"
-	"strconv"
-	"strings"
 )
 
 type SourceController struct {
-	Repository    repository.SourceRepositoryInterface
-	SourceManager *sources.SourceManager
-}
-
-type SourceRequest struct {
-	Title    string `json:"title" binding:"required"`
-	Name     string `json:"name" binding:"required"`
-	Type     string `json:"type" binding:"required"`
-	Host     string `json:"host" binding:"required"`
-	Port     int    `json:"port" binding:"required"`
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
-	Schema   string `json:"schema" binding:"required"`
+	Context *context.ApplicationContext
 }
 
 type PaginatedSources struct {
 	Total   int64           `json:"total"`
 	Entries []entity.Source `json:"entries"`
-}
-
-// Validate TODO MOVE TO .... ???
-func (model *SourceRequest) Validate() error {
-	if strings.Contains(model.Name, ";") {
-		return errors.New("name contains is forbidden symbol")
-	}
-
-	if strings.Contains(model.Host, ";") {
-		return errors.New("host contains is forbidden symbol")
-	}
-	if strings.Contains(model.Username, ";") {
-		return errors.New("username contains is forbidden symbol")
-	}
-	if strings.Contains(model.Password, ";") {
-		return errors.New("password contains is forbidden symbol")
-	}
-	if strings.Contains(model.Schema, ";") {
-		return errors.New("schema contains is forbidden symbol")
-	}
-
-	return nil
 }
 
 // listSourcesAction GoDoc
@@ -62,27 +26,21 @@ func (model *SourceRequest) Validate() error {
 //	@Schemes
 //	@Description	Paginated Source List
 //	@Param			page	query	int	false	"Page"
-//	@Param			limit	query	int	false	"Page"
+//	@Param			limit	query	int	false	"Limit"
 //	@Tags			Sources
 //	@Accept			json
 //	@Produce		json
 //	@Success		200	{array}	PaginatedSources
 //	@Router			/api/v1/sources [GET]
 func (controller *SourceController) listSourcesAction(c *gin.Context) {
-	//TODO may be bind to model (struct) ?
-	pageQuery := c.DefaultQuery("page", "1")
-	limitQuery := c.DefaultQuery("limit", "10")
+	pagination, err := dto.QueryFromContext(c)
 
-	page, pageOk := strconv.Atoi(pageQuery)
-	limit, limitOk := strconv.Atoi(limitQuery)
-
-	if pageOk != nil || limitOk != nil {
-		response.CreateBadRequestResponse(c, "bad query parameters")
-		return
+	if err != nil {
+		response.CreateBadRequestResponse(c, err.Error())
 	}
 
-	entries, err := controller.Repository.ListSources(page, limit)
-	count := controller.Repository.GetCount()
+	entries, err := controller.Context.SourceUseCase.ListSources(pagination)
+	count := controller.Context.SourceUseCase.GetCount()
 
 	if err != nil {
 		response.CreateInternalServerResponse(c, err.Error())
@@ -100,14 +58,14 @@ func (controller *SourceController) listSourcesAction(c *gin.Context) {
 //	@Summary	Create Source
 //	@Schemes
 //	@Description	Create entity
-//	@Param			request	body	SourceRequest	true	"Source Data"
+//	@Param			request	body	dto.SourceRequest	true	"Source Data"
 //	@Tags			Sources
 //	@Accept			json
 //	@Produce		json
 //	@Success		200	{object}	entity.Source
 //	@Router			/api/v1/sources [POST]
 func (controller *SourceController) createSourceAction(c *gin.Context) {
-	var request SourceRequest
+	var request dto.SourceRequest
 
 	if err := c.BindJSON(&request); err != nil {
 		response.CreateBadRequestResponse(c, err.Error())
@@ -119,27 +77,13 @@ func (controller *SourceController) createSourceAction(c *gin.Context) {
 		return
 	}
 
-	//TODO MOVE TO .... ????
-	//boilerplate
-	source := entity.Source{
-		Title:    request.Title,
-		Name:     request.Name,
-		Type:     request.Type,
-		Host:     request.Host,
-		Port:     request.Port,
-		Username: request.Username,
-		Password: request.Password,
-		Schema:   request.Schema,
-	}
-	err := controller.Repository.CreateSource(&source)
+	source := request.ToSource()
+	err := controller.Context.SourceUseCase.CreateSource(&source)
 
 	if err != nil {
 		response.CreateInternalServerResponse(c, err.Error())
 		return
 	}
-
-	//TODO MOVE TO ... ???
-	go controller.SourceManager.ImportDatabase(source) //side task for import database
 
 	c.JSON(http.StatusCreated, source)
 
@@ -152,29 +96,27 @@ func (controller *SourceController) createSourceAction(c *gin.Context) {
 //	@Description	Update entity
 //	@Tags			Sources
 //	@Param			id		path	int				true	"Source ID"
-//	@Param			request	body	SourceRequest	true	"Source Data"
+//	@Param			request	body	dto.SourceRequest	true	"Source Data"
 //	@Accept			json
 //	@Produce		json
 //	@Success		200	{object}	entity.Source
 //	@Router			/api/v1/sources/:id [PUT]
 func (controller *SourceController) editSourceAction(c *gin.Context) {
-	idParam := c.Param("id")
-
-	id, err := strconv.Atoi(idParam)
+	id, err := dto.IdFromContext(c)
 
 	if err != nil {
-		response.CreateNotFoundResponse(c, "invalid ID param")
+		response.CreateBadRequestResponse(c, "invalid ID param")
 		return
 	}
 
-	source, err := controller.Repository.GetSourceById(id)
+	source, err := controller.Context.SourceUseCase.GetSourceById(id)
 
 	if err != nil {
-		response.CreateNotFoundResponse(c, "invalid ID param")
+		response.CreateNotFoundResponse(c, "not found")
 		return
 	}
 
-	var request SourceRequest
+	var request dto.SourceUpdateRequest
 
 	if err := c.BindJSON(&request); err != nil {
 		response.CreateBadRequestResponse(c, err.Error())
@@ -186,18 +128,8 @@ func (controller *SourceController) editSourceAction(c *gin.Context) {
 		return
 	}
 
-	//TODO Refact?? need object to populate method
-	//boilerplate
-	source.Title = request.Title
-	source.Name = request.Name
-	source.Type = request.Type
-	source.Host = request.Host
-	source.Port = request.Port
-	source.Username = request.Username
-	source.Password = request.Password
-	source.Schema = request.Schema
-
-	err = controller.Repository.UpdateSource(&source)
+	request.ToSource(&source)
+	err = controller.Context.SourceUseCase.UpdateSource(&source)
 
 	if err != nil {
 		response.CreateInternalServerResponse(c, err.Error())
@@ -220,16 +152,14 @@ func (controller *SourceController) editSourceAction(c *gin.Context) {
 //	@Success		200	{object}	entity.Source
 //	@Router			/api/v1/sources/:id [GET]
 func (controller *SourceController) detailSourceAction(c *gin.Context) {
-	idParam := c.Param("id")
-
-	id, err := strconv.Atoi(idParam)
+	id, err := dto.IdFromContext(c)
 
 	if err != nil {
-		response.CreateNotFoundResponse(c, "invalid ID param")
+		response.CreateBadRequestResponse(c, "invalid ID param")
 		return
 	}
 
-	source, err := controller.Repository.GetSourceById(id)
+	source, err := controller.Context.SourceUseCase.GetSourceById(id)
 
 	if err != nil {
 		response.CreateNotFoundResponse(c, "not found")
@@ -251,30 +181,26 @@ func (controller *SourceController) detailSourceAction(c *gin.Context) {
 //	@Success		200	{object}	entity.Source
 //	@Router			/api/v1/sources/:id [DELETE]
 func (controller *SourceController) removeSourceAction(c *gin.Context) {
-	idParam := c.Param("id")
-
-	id, err := strconv.Atoi(idParam)
+	id, err := dto.IdFromContext(c)
 
 	if err != nil {
-		response.CreateNotFoundResponse(c, "invalid ID param")
+		response.CreateBadRequestResponse(c, "invalid ID param")
 		return
 	}
 
-	source, err := controller.Repository.GetSourceById(id)
+	source, err := controller.Context.SourceUseCase.GetSourceById(id)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		response.CreateNotFoundResponse(c, "not found")
 		return
 	}
 
-	err = controller.Repository.RemoveSource(&source)
+	err = controller.Context.SourceUseCase.RemoveSource(&source)
 
 	if err != nil {
 		response.CreateInternalServerResponse(c, err.Error())
 		return
 	}
-
-	go controller.SourceManager.DeleteDatabase(source)
 
 	c.JSON(http.StatusOK, source)
 }

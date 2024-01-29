@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"dmaas/internal/app/dmaas/dto"
 	"dmaas/internal/app/dmaas/entity"
 	"gorm.io/gorm"
 )
@@ -9,7 +10,7 @@ type UserRepositoryInterface interface {
 	CreateUser(user *entity.User) error
 	UpdateUser(user *entity.User) error
 	RemoveUser(user *entity.User) error
-	ListUsers(page, limit int) ([]entity.User, error)
+	ListUsers(pagination dto.Query) ([]entity.User, error)
 	GetUserById(id int) (entity.User, error)
 	GetUserByUsername(username string) (entity.User, error)
 	GetCount() int64
@@ -49,10 +50,10 @@ func (repository *UserRepository) RemoveUser(user *entity.User) error {
 	return repository.DB.Delete(user).Error
 }
 
-func (repository *UserRepository) ListUsers(page, limit int) ([]entity.User, error) {
+func (repository *UserRepository) ListUsers(pagination dto.Query) ([]entity.User, error) {
 	var users []entity.User
-	offset := (page - 1) * limit
-	if err := repository.DB.Offset(offset).Limit(limit).Find(&users).Error; err != nil {
+	offset := (pagination.Page - 1) * pagination.Limit
+	if err := repository.DB.Offset(offset).Limit(pagination.Limit).Find(&users).Error; err != nil {
 		return []entity.User{}, err
 	}
 

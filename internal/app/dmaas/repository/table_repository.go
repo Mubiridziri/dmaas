@@ -1,12 +1,13 @@
 package repository
 
 import (
+	"dmaas/internal/app/dmaas/dto"
 	"dmaas/internal/app/dmaas/entity"
 	"gorm.io/gorm"
 )
 
 type TableRepositoryInterface interface {
-	ListTables(sourceId int, page, limit int) ([]entity.Table, error)
+	ListTables(sourceId int, pagination dto.Query) ([]entity.Table, error)
 	GetTableById(id int) (entity.Table, error)
 	GetCount() int64
 }
@@ -15,12 +16,12 @@ type TableRepository struct {
 	DB *gorm.DB
 }
 
-func (repository *TableRepository) ListTables(sourceId int, page, limit int) ([]entity.Table, error) {
+func (repository *TableRepository) ListTables(sourceId int, pagination dto.Query) ([]entity.Table, error) {
 	var tables []entity.Table
-	offset := (page - 1) * limit
+	offset := (pagination.Page - 1) * pagination.Limit
 	if err := repository.DB.
 		Offset(offset).
-		Limit(limit).
+		Limit(pagination.Limit).
 		Where(entity.Table{SourceID: sourceId}).
 		Find(&tables).Error; err != nil {
 		return []entity.Table{}, err

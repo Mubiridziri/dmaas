@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"dmaas/internal/app/dmaas/dto"
 	"dmaas/internal/app/dmaas/entity"
 	"gorm.io/gorm"
 )
@@ -9,7 +10,7 @@ type SourceRepositoryInterface interface {
 	CreateSource(source *entity.Source) error
 	UpdateSource(source *entity.Source) error
 	RemoveSource(source *entity.Source) error
-	ListSources(page, limit int) ([]entity.Source, error)
+	ListSources(pagination dto.Query) ([]entity.Source, error)
 	GetSourceById(id int) (entity.Source, error)
 	GetCount() int64
 }
@@ -30,10 +31,10 @@ func (repository *SourceRepository) RemoveSource(source *entity.Source) error {
 	return repository.DB.Delete(source).Error
 }
 
-func (repository *SourceRepository) ListSources(page, limit int) ([]entity.Source, error) {
+func (repository *SourceRepository) ListSources(pagination dto.Query) ([]entity.Source, error) {
 	var sources []entity.Source
-	offset := (page - 1) * limit
-	if err := repository.DB.Offset(offset).Limit(limit).Find(&sources).Error; err != nil {
+	offset := (pagination.Page - 1) * pagination.Limit
+	if err := repository.DB.Offset(offset).Limit(pagination.Limit).Find(&sources).Error; err != nil {
 		return []entity.Source{}, err
 	}
 

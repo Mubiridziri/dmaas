@@ -1,22 +1,16 @@
 package v1
 
 import (
+	"dmaas/internal/app/dmaas/context"
 	"dmaas/internal/app/dmaas/controller/response"
+	"dmaas/internal/app/dmaas/dto"
 	"dmaas/internal/app/dmaas/entity"
-	"dmaas/internal/app/dmaas/repository"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strconv"
 )
 
 type UserController struct {
-	Repository repository.UserRepositoryInterface
-}
-
-type UserRequest struct {
-	Name     string `json:"name"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Context *context.ApplicationContext
 }
 
 type PaginatedUsers struct {
@@ -30,27 +24,21 @@ type PaginatedUsers struct {
 //	@Schemes
 //	@Description	Paginated User List
 //	@Param			page	query	int	false	"Page"
-//	@Param			limit	query	int	false	"Page"
+//	@Param			limit	query	int	false	"Limit"
 //	@Tags			Users
 //	@Accept			json
 //	@Produce		json
 //	@Success		200	{array}	PaginatedUsers
 //	@Router			/api/v1/users [GET]
 func (controller *UserController) listUsersAction(c *gin.Context) {
-	//TODO may be bind to model (struct) ?
-	pageQuery := c.DefaultQuery("page", "1")
-	limitQuery := c.DefaultQuery("limit", "10")
+	pagination, err := dto.QueryFromContext(c)
 
-	page, pageOk := strconv.Atoi(pageQuery)
-	limit, limitOk := strconv.Atoi(limitQuery)
-
-	if pageOk != nil || limitOk != nil {
-		response.CreateBadRequestResponse(c, "bad query parameters")
-		return
+	if err != nil {
+		response.CreateBadRequestResponse(c, err.Error())
 	}
 
-	entries, err := controller.Repository.ListUsers(page, limit)
-	count := controller.Repository.GetCount()
+	entries, err := controller.Context.UserUseCase.ListUsers(pagination)
+	count := controller.Context.UserUseCase.GetCount()
 
 	if err != nil {
 		response.CreateInternalServerResponse(c, err.Error())
@@ -75,21 +63,15 @@ func (controller *UserController) listUsersAction(c *gin.Context) {
 //	@Success		200	{object}	entity.User
 //	@Router			/api/v1/users [POST]
 func (controller *UserController) createUserAction(c *gin.Context) {
-	var request UserRequest
+	var request dto.UserRequest
 
 	if err := c.BindJSON(&request); err != nil {
 		response.CreateBadRequestResponse(c, err.Error())
 		return
 	}
 
-	//TODO MOVE TO .... ????
-	//boilerplate
-	user := entity.User{
-		Name:     request.Name,
-		Username: request.Username,
-		Password: request.Password,
-	}
-	err := controller.Repository.CreateUser(&user)
+	user := request.ToUser()
+	err := controller.Context.UserUseCase.CreateUser(&user)
 
 	if err != nil {
 		response.CreateInternalServerResponse(c, err.Error())
@@ -112,36 +94,26 @@ func (controller *UserController) createUserAction(c *gin.Context) {
 //	@Success		200	{object}	entity.User
 //	@Router			/api/v1/users/:id [PUT]
 func (controller *UserController) editUserAction(c *gin.Context) {
-	idParam := c.Param("id")
-
-	id, err := strconv.Atoi(idParam)
-
+	id, err := dto.IdFromContext(c)
 	if err != nil {
 		response.CreateNotFoundResponse(c, "invalid ID param")
 		return
 	}
 
-	user, err := controller.Repository.GetUserById(id)
-
+	user, err := controller.Context.UserUseCase.GetUserById(id)
 	if err != nil {
 		response.CreateNotFoundResponse(c, "invalid ID param")
 		return
 	}
 
-	var request UserRequest
-
+	var request dto.UserUpdateRequest
 	if err := c.BindJSON(&request); err != nil {
 		response.CreateBadRequestResponse(c, err.Error())
 		return
 	}
 
-	//TODO Refact?? need object to populate method
-	//boilerplate
-	user.Name = request.Name
-	user.Username = request.Username
-	user.Password = request.Password
-
-	err = controller.Repository.UpdateUser(&user)
+	request.ToUser(&user)
+	err = controller.Context.UserUseCase.UpdateUser(&user)
 
 	if err != nil {
 		response.CreateInternalServerResponse(c, err.Error())
@@ -163,17 +135,13 @@ func (controller *UserController) editUserAction(c *gin.Context) {
 //	@Success		200	{object}	entity.User
 //	@Router			/api/v1/users/:id [GET]
 func (controller *UserController) detailUserAction(c *gin.Context) {
-	idParam := c.Param("id")
-
-	id, err := strconv.Atoi(idParam)
-
+	id, err := dto.IdFromContext(c)
 	if err != nil {
 		response.CreateNotFoundResponse(c, "invalid ID param")
 		return
 	}
 
-	user, err := controller.Repository.GetUserById(id)
-
+	user, err := controller.Context.UserUseCase.GetUserById(id)
 	if err != nil {
 		response.CreateNotFoundResponse(c, "not found")
 		return
@@ -194,18 +162,14 @@ func (controller *UserController) detailUserAction(c *gin.Context) {
 //	@Success		200	{object}	entity.User
 //	@Router			/api/v1/users/:id [DELETE]
 func (controller *UserController) removeUserAction(c *gin.Context) {
-	idParam := c.Param("id")
-
-	id, err := strconv.Atoi(idParam)
-
+	id, err := dto.IdFromContext(c)
 	if err != nil {
 		response.CreateNotFoundResponse(c, "invalid ID param")
 		return
 	}
 
-	user, err := controller.Repository.GetUserById(id)
-	err = controller.Repository.RemoveUser(&user)
-
+	user, err := controller.Context.UserUseCase.GetUserById(id)
+	err = controller.Context.UserUseCase.RemoveUser(&user)
 	if err != nil {
 		response.CreateInternalServerResponse(c, err.Error())
 		return

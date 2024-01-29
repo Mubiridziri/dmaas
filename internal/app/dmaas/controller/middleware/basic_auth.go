@@ -1,15 +1,15 @@
 package middleware
 
 import (
+	"dmaas/internal/app/dmaas/context"
 	"dmaas/internal/app/dmaas/controller/response"
-	"dmaas/internal/app/dmaas/repository"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
 const UserKey = "AUTH"
 
-func AuthRequired(userRepository repository.UserRepositoryInterface) gin.HandlerFunc {
+func AuthRequired(context *context.ApplicationContext) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		session := sessions.Default(c)
@@ -20,7 +20,7 @@ func AuthRequired(userRepository repository.UserRepositoryInterface) gin.Handler
 			return
 		}
 
-		user, err := userRepository.GetUserByUsername(userKey.(string))
+		user, err := context.UserUseCase.GetUserByUsername(userKey.(string))
 
 		if err != nil {
 			response.CreateUnauthorizedResponse(c, "invalid cookie")
