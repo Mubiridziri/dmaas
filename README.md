@@ -71,7 +71,7 @@ swag                           Update swagger.json
 swag-fmt                       Formatter for GoDoc (Swagger)
 docker-up                      Start Docker-Compose Container with app & database
 docker-down                    Down Docker-Compose Containers
-docker-database-up             Start Docker-compose Container with only database usecase
+docker-database-up             Start Docker-compose Container with only database service
 ```
 
 ## Планы после MVP

@@ -6,6 +6,7 @@ import (
 	"dmaas/internal/app/dmaas/controller"
 	"dmaas/internal/app/dmaas/database"
 	"dmaas/internal/app/dmaas/dto"
+	"dmaas/internal/app/dmaas/handler"
 	"net/http"
 )
 
@@ -28,9 +29,15 @@ func (a *Application) Run() error {
 		return err
 	}
 
-	var sourceChan = make(chan dto.SourceChan)
+	var sourceSender = make(chan dto.SourceMessage)
 
-	ctx := context.New(cfg, db, &sourceChan)
+	//Create ApplicationContext
+	ctx := context.New(cfg, db, sourceSender)
+
+	//Start SourceHandler
+	sourceHandler := handler.SourceHandler{Context: ctx}
+	go sourceHandler.HandleSources(sourceSender)
+
 	router := controller.Router{Context: ctx}
 
 	return http.ListenAndServe(a.BindAddr, router.NewRouter())

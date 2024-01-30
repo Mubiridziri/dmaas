@@ -18,11 +18,14 @@ type SourceUseCaseInterface interface {
 	ListSources(pagination dto.Query) ([]entity.Source, error)
 	GetSourceById(id int) (entity.Source, error)
 	GetCount() int64
+	ImportDatabase(source entity.Source)
+	DeleteDatabase(source entity.Source)
 }
 
 type SourceUseCase struct {
 	DB               *gorm.DB
 	SourceRepository repository.SourceRepositoryInterface
+	SourceSender     chan dto.SourceMessage
 }
 
 type InformationSchemaTable struct {
@@ -37,8 +40,12 @@ type InformationSchemaColumn struct {
 
 func (useCase *SourceUseCase) CreateSource(source *entity.Source) error {
 	err := useCase.SourceRepository.CreateSource(source)
-	//TODO send to global goroutine via sender chan
-	go useCase.importDatabase(*source)
+	//go useCase.importDatabase(*source)
+
+	useCase.SourceSender <- dto.SourceMessage{
+		Source: source,
+		Action: dto.ImportDatabaseAction,
+	}
 
 	return err
 }
@@ -49,8 +56,11 @@ func (useCase *SourceUseCase) UpdateSource(source *entity.Source) error {
 
 func (useCase *SourceUseCase) RemoveSource(source *entity.Source) error {
 	err := useCase.SourceRepository.RemoveSource(source)
-	//TODO send to global goroutine via sender chan
-	go useCase.deleteDatabase(*source)
+
+	useCase.SourceSender <- dto.SourceMessage{
+		Source: source,
+		Action: dto.RemoveDatabaseAction,
+	}
 
 	return err
 }
@@ -68,7 +78,7 @@ func (useCase *SourceUseCase) GetCount() int64 {
 }
 
 // ImportDatabase only start in goroutine!
-func (useCase *SourceUseCase) importDatabase(source entity.Source) {
+func (useCase *SourceUseCase) ImportDatabase(source entity.Source) {
 	localSchemaName, err := useCase.createLocalSchema(source)
 	databaseDriver, err := useCase.getDriverByType(source.Type)
 
@@ -89,7 +99,7 @@ func (useCase *SourceUseCase) importDatabase(source entity.Source) {
 	}
 }
 
-func (useCase *SourceUseCase) deleteDatabase(source entity.Source) {
+func (useCase *SourceUseCase) DeleteDatabase(source entity.Source) {
 	databaseDriver, err := useCase.getDriverByType(source.Type)
 	if err != nil {
 		return

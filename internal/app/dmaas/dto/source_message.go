@@ -7,7 +7,7 @@ const (
 	RemoveDatabaseAction = "RemoveDatabaseAction"
 )
 
-type SourceChan struct {
-	Source entity.Source
+type SourceMessage struct {
+	Source *entity.Source
 	Action string
 }

@@ -10,7 +10,7 @@ import (
 
 type ApplicationContext struct {
 	Config                *config.Config
-	SourceChan            *chan dto.SourceChan
+	SourceChan            chan dto.SourceMessage
 	SourceUseCase         usecase.SourceUseCaseInterface
 	DictionaryUseCase     usecase.DictionaryUseCaseInterface
 	DictionaryDataUseCase usecase.DictionaryDataUseCaseInterface
@@ -19,13 +19,14 @@ type ApplicationContext struct {
 	TableDataUseCase      usecase.TableDataUseCaseInterface
 }
 
-func New(cfg *config.Config, db *gorm.DB, sourceChan *chan dto.SourceChan) *ApplicationContext {
+func New(cfg *config.Config, db *gorm.DB, sourceChan chan dto.SourceMessage) *ApplicationContext {
 	return &ApplicationContext{
 		Config:     cfg,
 		SourceChan: sourceChan,
 		SourceUseCase: &usecase.SourceUseCase{
 			DB:               db,
 			SourceRepository: &repository.SourceRepository{DB: db},
+			SourceSender:     sourceChan,
 		},
 		DictionaryUseCase: &usecase.DictionaryUseCase{
 			DictionaryRepository: &repository.DictionaryRepository{DB: db},
