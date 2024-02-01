@@ -1,7 +1,7 @@
 package main
 
 import (
-	"dmaas/internal/app/dmaas"
+	"dmaas/internal/app"
 	"flag"
 	"log"
 )
@@ -17,9 +17,9 @@ func init() {
 func main() {
 	flag.Parse()
 
-	app := dmaas.New(":" + bindAddr)
+	a := app.New(":" + bindAddr)
 
-	if err := app.Run(); err != nil {
+	if err := a.Run(); err != nil {
 		log.Fatal(err)
 	}
 }
