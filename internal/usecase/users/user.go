@@ -2,8 +2,14 @@ package users
 
 import (
 	"dmaas/internal/entity"
+	"errors"
 	"time"
 )
+
+type UserLogin struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
 
 type UserView struct {
 	Name      string    `json:"name"`
@@ -13,9 +19,9 @@ type UserView struct {
 }
 
 type CreateOrUpdateUserView struct {
-	Name     string `json:"name"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Name     string `json:"name"  binding:"required"`
+	Username string `json:"username"  binding:"required"`
+	Password string `json:"password"  binding:"required"`
 }
 
 type Repository interface {
@@ -41,6 +47,20 @@ func NewController(repo Repository) *Controller {
 	return &Controller{Repository: repo}
 }
 
+func (c Controller) LoginUser(input UserLogin) (UserView, error) {
+	user, err := c.Repository.GetUserByUsername(input.Username)
+
+	if err != nil {
+		return UserView{}, err
+	}
+
+	if !user.IsPasswordCorrect(input.Password) {
+		return UserView{}, errors.New("invalid credentials")
+	}
+
+	return fromDBUser(&user), nil
+}
+
 func (c Controller) CreateUser(input CreateOrUpdateUserView) (UserView, error) {
 	user := entity.User{
 		Name:     input.Name,
@@ -54,11 +74,16 @@ func (c Controller) CreateUser(input CreateOrUpdateUserView) (UserView, error) {
 	return fromDBUser(&user), nil
 }
 
-func (c Controller) UpdateUser(input CreateOrUpdateUserView) (UserView, error) {
-	user := entity.User{
-		Name:     input.Name,
-		Username: input.Username,
+func (c Controller) UpdateUser(id int, input CreateOrUpdateUserView) (UserView, error) {
+
+	user, err := c.Repository.GetUserById(id)
+
+	if err != nil {
+		return UserView{}, err
 	}
+
+	user.Name = input.Name
+	user.Username = input.Username
 
 	if input.Password != "" {
 		user.Password = input.Password

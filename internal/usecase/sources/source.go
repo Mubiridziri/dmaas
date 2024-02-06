@@ -47,14 +47,14 @@ type TableFieldView struct {
 }
 
 type CreateOrUpdateSourceView struct {
-	Title    string `json:"title"`
-	Name     string `json:"name"`
-	Type     string `json:"type"`
-	Host     string `json:"host"`
-	Port     int    `json:"port"`
+	Title    string `json:"title"  binding:"required"`
+	Name     string `json:"name"  binding:"required"`
+	Type     string `json:"type"  binding:"required"`
+	Host     string `json:"host"  binding:"required"`
+	Port     int    `json:"port"  binding:"required"`
 	Schema   string `json:"schema"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `json:"username"  binding:"required"`
+	Password string `json:"password"  binding:"required"`
 }
 
 type Repository interface {

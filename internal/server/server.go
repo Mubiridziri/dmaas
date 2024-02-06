@@ -79,13 +79,12 @@ func (s *Server) registerRoutes() {
 
 	mainGroup.Use(AuthRequired(s.userController))
 	{
+		s.AddUserRoutes(mainGroup)
+		s.AddSourceRoutes(mainGroup)
+		s.AddDictionaryRoutes(mainGroup)
+
 		//mainGroup.GET("/login", securityController.ProfileAction)
 		//mainGroup.GET("/logout", securityController.LogoutAction)
-		//
-		//userController.AddUserRoute(mainGroup)
-		//sourceController.AddSourceRoute(mainGroup)
-		//tableController.AddTableRoute(mainGroup)
-		//dictionaryController.AddDictionaryRoute(mainGroup)
 	}
 }
 

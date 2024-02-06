@@ -1,54 +1,18 @@
 definitions:
-  entity.Field:
+  users.UserLogin:
     properties:
-      comment:
+      password:
         type: string
-      name:
+      username:
         type: string
-      nullable:
-        type: boolean
-      type:
-        type: string
+    required:
+    - password
+    - username
     type: object
-  entity.Source:
-    properties:
-      alive:
-        type: boolean
-      host:
-        type: string
-      id:
-        type: integer
-      name:
-        type: string
-      port:
-        type: integer
-      schema:
-        type: string
-      title:
-        type: string
-      type:
-        description: postgresql, mysql, oracle, innodb, etc
-        type: string
-    type: object
-  entity.Table:
-    properties:
-      comment:
-        type: string
-      fields:
-        items:
-          $ref: '#/definitions/entity.Field'
-        type: array
-      id:
-        type: integer
-      name:
-        type: string
-    type: object
-  entity.User:
+  users.UserView:
     properties:
       created_at:
         type: string
-      id:
-        type: integer
       name:
         type: string
       updated_at:
@@ -56,432 +20,56 @@ definitions:
       username:
         type: string
     type: object
-  routes.LoginRequest:
-    properties:
-      password:
-        type: string
-      username:
-        type: string
-    type: object
-  routes.PaginatedSources:
-    properties:
-      entries:
-        items:
-          $ref: '#/definitions/entity.Source'
-        type: array
-      total:
-        type: integer
-    type: object
-  routes.PaginatedTables:
-    properties:
-      entries:
-        items:
-          $ref: '#/definitions/entity.Table'
-        type: array
-      total:
-        type: integer
-    type: object
-  routes.PaginatedTablesData:
-    properties:
-      entries:
-        items:
-          additionalProperties: true
-          type: object
-        type: array
-      total:
-        type: integer
-    type: object
-  routes.PaginatedUsers:
-    properties:
-      entries:
-        items:
-          $ref: '#/definitions/entity.User'
-        type: array
-      total:
-        type: integer
-    type: object
-  routes.SourceRequest:
-    properties:
-      host:
-        type: string
-      name:
-        type: string
-      password:
-        type: string
-      port:
-        type: integer
-      schema:
-        type: string
-      title:
-        type: string
-      type:
-        type: string
-      username:
-        type: string
-    required:
-      - host
-      - name
-      - password
-      - port
-      - schema
-      - title
-      - type
-      - username
-    type: object
-  routes.UserRequest:
-    properties:
-      name:
-        type: string
-      password:
-        type: string
-      username:
-        type: string
-    type: object
 info:
-  contact: { }
+  contact: {}
 paths:
   /api/v1/login:
     get:
       consumes:
-        - application/json
+      - application/json
       description: You can check auth or get profile data
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/entity.User'
+            $ref: '#/definitions/users.UserView'
       summary: Profile
       tags:
-        - Security
+      - Security
     post:
       consumes:
-        - application/json
+      - application/json
       description: Authorization with help username and password
       parameters:
-        - description: Username and password
-          in: body
-          name: request
-          required: true
-          schema:
-            $ref: '#/definitions/routes.LoginRequest'
+      - description: Model
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/users.UserLogin'
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/routes.LoginRequest'
+            $ref: '#/definitions/users.UserView'
       summary: Login
       tags:
-        - Security
+      - Security
   /api/v1/logout:
     post:
       consumes:
-        - application/json
+      - application/json
       description: Logout from account
       produces:
-        - application/json
+      - application/json
       responses:
         "200":
           description: OK
       summary: Logout
       tags:
-        - Security
-  /api/v1/sources:
-    get:
-      consumes:
-        - application/json
-      description: Paginated Source List
-      parameters:
-        - description: Page
-          in: query
-          name: page
-          type: integer
-        - description: Page
-          in: query
-          name: limit
-          type: integer
-      produces:
-        - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/routes.PaginatedSources'
-            type: array
-      summary: List Source
-      tags:
-        - Sources
-    post:
-      consumes:
-        - application/json
-      description: Create entity
-      parameters:
-        - description: Source Data
-          in: body
-          name: request
-          required: true
-          schema:
-            $ref: '#/definitions/routes.SourceRequest'
-      produces:
-        - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/entity.Source'
-      summary: Create Source
-      tags:
-        - Sources
-  /api/v1/sources/:id:
-    delete:
-      consumes:
-        - application/json
-      description: Remove By ID
-      parameters:
-        - description: Source ID
-          in: path
-          name: id
-          required: true
-          type: integer
-      produces:
-        - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/entity.Source'
-      summary: Remove Source
-      tags:
-        - Sources
-    get:
-      consumes:
-        - application/json
-      description: Get By ID
-      parameters:
-        - description: Source ID
-          in: path
-          name: id
-          required: true
-          type: integer
-      produces:
-        - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/entity.Source'
-      summary: Detail Source
-      tags:
-        - Sources
-    put:
-      consumes:
-        - application/json
-      description: Update entity
-      parameters:
-        - description: Source ID
-          in: path
-          name: id
-          required: true
-          type: integer
-        - description: Source Data
-          in: body
-          name: request
-          required: true
-          schema:
-            $ref: '#/definitions/routes.SourceRequest'
-      produces:
-        - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/entity.Source'
-      summary: Update Source
-      tags:
-        - Sources
-  /api/v1/sources/:id/tables:
-    get:
-      consumes:
-        - application/json
-      description: Paginated Table List
-      parameters:
-        - description: SourceID
-          in: path
-          name: sourceId
-          required: true
-          type: integer
-        - description: Page
-          in: query
-          name: page
-          type: integer
-        - description: Page
-          in: query
-          name: limit
-          type: integer
-      produces:
-        - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/routes.PaginatedTables'
-            type: array
-      summary: List Table
-      tags:
-        - Sources
-  /api/v1/sources/table/data/:id:
-    get:
-      consumes:
-        - application/json
-      description: Paginated Table List
-      parameters:
-        - description: SourceID
-          in: path
-          name: sourceId
-          required: true
-          type: integer
-        - description: TableID
-          in: path
-          name: sourceId
-          required: true
-          type: integer
-        - description: Page
-          in: query
-          name: page
-          type: integer
-        - description: Limit
-          in: query
-          name: limit
-          type: integer
-      produces:
-        - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/routes.PaginatedTablesData'
-            type: array
-      summary: List Table Data
-      tags:
-        - Sources
-  /api/v1/users:
-    get:
-      consumes:
-        - application/json
-      description: Paginated User List
-      parameters:
-        - description: Page
-          in: query
-          name: page
-          type: integer
-        - description: Page
-          in: query
-          name: limit
-          type: integer
-      produces:
-        - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/routes.PaginatedUsers'
-            type: array
-      summary: List User
-      tags:
-        - Users
-    post:
-      consumes:
-        - application/json
-      description: Create entity
-      parameters:
-        - description: User Data
-          in: body
-          name: request
-          required: true
-          schema:
-            $ref: '#/definitions/routes.UserRequest'
-      produces:
-        - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/entity.User'
-      summary: Create User
-      tags:
-        - Users
-  /api/v1/users/:id:
-    delete:
-      consumes:
-        - application/json
-      description: Remove By ID
-      parameters:
-        - description: User ID
-          in: path
-          name: id
-          required: true
-          type: integer
-      produces:
-        - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/entity.User'
-      summary: Remove User
-      tags:
-        - Users
-    get:
-      consumes:
-        - application/json
-      description: Get By ID
-      parameters:
-        - description: User ID
-          in: path
-          name: id
-          required: true
-          type: integer
-      produces:
-        - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/entity.User'
-      summary: Detail User
-      tags:
-        - Users
-    put:
-      consumes:
-        - application/json
-      description: Update entity
-      parameters:
-        - description: User ID
-          in: path
-          name: id
-          required: true
-          type: integer
-        - description: User Data
-          in: body
-          name: request
-          required: true
-          schema:
-            $ref: '#/definitions/routes.UserRequest'
-      produces:
-        - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/entity.User'
-      summary: Update User
-      tags:
-        - Users
+      - Security
 swagger: "2.0"

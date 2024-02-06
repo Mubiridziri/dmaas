@@ -21,14 +21,14 @@ type DictionaryFieldView struct {
 }
 
 type CreateOrUpdateDictionaryView struct {
-	Title  string                              `json:"title"`
-	Fields []CreateOrUpdateDictionaryFieldView `json:"fields"`
+	Title  string                              `json:"title"  binding:"required"`
+	Fields []CreateOrUpdateDictionaryFieldView `json:"fields"  binding:"required"`
 }
 
 type CreateOrUpdateDictionaryFieldView struct {
-	Title string `json:"title"`
-	Name  string `json:"name"`
-	Type  string `json:"type"`
+	Title string `json:"title"  binding:"required"`
+	Name  string `json:"name"  binding:"required"`
+	Type  string `json:"type"  binding:"required"`
 }
 
 type PaginatedDictionariesList struct {
