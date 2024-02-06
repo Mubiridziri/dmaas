@@ -34,9 +34,10 @@ func (a *Application) Run() error {
 	}
 
 	repo := entity.NewRepository(db)
+	var sourceJobs = make(chan sources.Job)
 
 	userController := users.NewController(repo)
-	sourceController := sources.NewController(repo, db, make(chan sources.Job))
+	sourceController := sources.NewController(repo, db, sourceJobs)
 	tableController := tables.NewController(repo)
 	tableDataController := tabledata.NewController(repo)
 	dictController := dictionaries.NewController(repo)
@@ -50,6 +51,8 @@ func (a *Application) Run() error {
 		DictionaryController:     dictController,
 		DictionaryDataController: dictDataController,
 	})
+
+	sourceController.StartHandler()
 
 	return http.ListenAndServe(a.BindAddr, s.Router)
 }

@@ -16,19 +16,18 @@ const (
 )
 
 type SourceView struct {
-	ID        int               `json:"id"`
-	Title     string            `json:"title"`
-	Name      string            `json:"name"`
-	Type      string            `json:"type"`
-	Host      string            `json:"host"`
-	Port      int               `json:"port"`
-	Username  string            `json:"-"`
-	Password  string            `json:"-"`
-	Schema    string            `json:"schema"`
-	Alive     bool              `json:"alive"`
-	Tables    []SourceTableView `json:"tables"`
-	CreatedAt time.Time         `json:"created_at"`
-	UpdatedAt time.Time         `json:"updated_at"`
+	ID        int       `json:"id"`
+	Title     string    `json:"title"`
+	Name      string    `json:"name"`
+	Type      string    `json:"type"`
+	Host      string    `json:"host"`
+	Port      int       `json:"port"`
+	Username  string    `json:"-"`
+	Password  string    `json:"-"`
+	Schema    string    `json:"schema"`
+	Alive     bool      `json:"alive"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type SourceTableView struct {
@@ -114,6 +113,11 @@ func (c Controller) CreateSource(input CreateOrUpdateSourceView) (SourceView, er
 		return SourceView{}, err
 	}
 
+	c.SourceSender <- Job{
+		Action: ImportAction,
+		Source: source,
+	}
+
 	return fromDBSource(&source), nil
 }
 
@@ -126,6 +130,11 @@ func (c Controller) RemoveSource(id int) (SourceView, error) {
 
 	if err != nil {
 		return SourceView{}, err
+	}
+
+	c.SourceSender <- Job{
+		Action: RemoveAction,
+		Source: source,
 	}
 
 	err = c.Repository.RemoveSource(&source)
@@ -294,30 +303,6 @@ func fromDBSource(u *entity.Source) SourceView {
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,
 	}
-
-	var tables []SourceTableView
-
-	for _, dbt := range u.Tables {
-		var fields []TableFieldView
-		table := SourceTableView{
-			ID:      dbt.ID,
-			Name:    dbt.Name,
-			Comment: dbt.Comment,
-		}
-		for _, dbf := range dbt.Fields {
-			field := TableFieldView{
-				ID:       dbf.ID,
-				Name:     dbf.Name,
-				Type:     dbf.Type,
-				Comment:  dbf.Comment,
-				Nullable: dbf.Nullable,
-			}
-			fields = append(fields, field)
-		}
-		tables = append(tables, table)
-
-	}
-	source.Tables = tables
 
 	return source
 }

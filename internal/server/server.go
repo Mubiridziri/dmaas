@@ -75,7 +75,7 @@ func (s *Server) registerRoutes() {
 
 	//API /api/v1
 	mainGroup := s.Router.Group("/api/v1")
-	//mainGroup.POST("/login", securityController.LoginAction)
+	mainGroup.POST("/login", s.handleLogin)
 
 	mainGroup.Use(AuthRequired(s.userController))
 	{
@@ -83,8 +83,8 @@ func (s *Server) registerRoutes() {
 		s.AddSourceRoutes(mainGroup)
 		s.AddDictionaryRoutes(mainGroup)
 
-		//mainGroup.GET("/login", securityController.ProfileAction)
-		//mainGroup.GET("/logout", securityController.LogoutAction)
+		mainGroup.GET("/login", s.handleProfile)
+		mainGroup.GET("/logout", s.handleLogout)
 	}
 }
 
