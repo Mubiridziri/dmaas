@@ -119,14 +119,14 @@ definitions:
       username:
         type: string
     required:
-    - host
-    - name
-    - password
-    - port
-    - schema
-    - title
-    - type
-    - username
+      - host
+      - name
+      - password
+      - port
+      - schema
+      - title
+      - type
+      - username
     type: object
   routes.UserRequest:
     properties:
@@ -138,15 +138,15 @@ definitions:
         type: string
     type: object
 info:
-  contact: {}
+  contact: { }
 paths:
   /api/v1/login:
     get:
       consumes:
-      - application/json
+        - application/json
       description: You can check auth or get profile data
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -154,20 +154,20 @@ paths:
             $ref: '#/definitions/entity.User'
       summary: Profile
       tags:
-      - Security
+        - Security
     post:
       consumes:
-      - application/json
+        - application/json
       description: Authorization with help username and password
       parameters:
-      - description: Username and password
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/routes.LoginRequest'
+        - description: Username and password
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/routes.LoginRequest'
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -175,36 +175,36 @@ paths:
             $ref: '#/definitions/routes.LoginRequest'
       summary: Login
       tags:
-      - Security
+        - Security
   /api/v1/logout:
     post:
       consumes:
-      - application/json
+        - application/json
       description: Logout from account
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
       summary: Logout
       tags:
-      - Security
+        - Security
   /api/v1/sources:
     get:
       consumes:
-      - application/json
+        - application/json
       description: Paginated Source List
       parameters:
-      - description: Page
-        in: query
-        name: page
-        type: integer
-      - description: Page
-        in: query
-        name: limit
-        type: integer
+        - description: Page
+          in: query
+          name: page
+          type: integer
+        - description: Page
+          in: query
+          name: limit
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -214,20 +214,20 @@ paths:
             type: array
       summary: List Source
       tags:
-      - Sources
+        - Sources
     post:
       consumes:
-      - application/json
+        - application/json
       description: Create entity
       parameters:
-      - description: Source Data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/routes.SourceRequest'
+        - description: Source Data
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/routes.SourceRequest'
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -235,20 +235,20 @@ paths:
             $ref: '#/definitions/entity.Source'
       summary: Create Source
       tags:
-      - Sources
+        - Sources
   /api/v1/sources/:id:
     delete:
       consumes:
-      - application/json
+        - application/json
       description: Remove By ID
       parameters:
-      - description: Source ID
-        in: path
-        name: id
-        required: true
-        type: integer
+        - description: Source ID
+          in: path
+          name: id
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -256,19 +256,19 @@ paths:
             $ref: '#/definitions/entity.Source'
       summary: Remove Source
       tags:
-      - Sources
+        - Sources
     get:
       consumes:
-      - application/json
+        - application/json
       description: Get By ID
       parameters:
-      - description: Source ID
-        in: path
-        name: id
-        required: true
-        type: integer
+        - description: Source ID
+          in: path
+          name: id
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -276,25 +276,25 @@ paths:
             $ref: '#/definitions/entity.Source'
       summary: Detail Source
       tags:
-      - Sources
+        - Sources
     put:
       consumes:
-      - application/json
+        - application/json
       description: Update entity
       parameters:
-      - description: Source ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Source Data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/routes.SourceRequest'
+        - description: Source ID
+          in: path
+          name: id
+          required: true
+          type: integer
+        - description: Source Data
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/routes.SourceRequest'
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -302,28 +302,28 @@ paths:
             $ref: '#/definitions/entity.Source'
       summary: Update Source
       tags:
-      - Sources
+        - Sources
   /api/v1/sources/:id/tables:
     get:
       consumes:
-      - application/json
+        - application/json
       description: Paginated Table List
       parameters:
-      - description: SourceID
-        in: path
-        name: sourceId
-        required: true
-        type: integer
-      - description: Page
-        in: query
-        name: page
-        type: integer
-      - description: Page
-        in: query
-        name: limit
-        type: integer
+        - description: SourceID
+          in: path
+          name: sourceId
+          required: true
+          type: integer
+        - description: Page
+          in: query
+          name: page
+          type: integer
+        - description: Page
+          in: query
+          name: limit
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -333,33 +333,33 @@ paths:
             type: array
       summary: List Table
       tags:
-      - Sources
+        - Sources
   /api/v1/sources/table/data/:id:
     get:
       consumes:
-      - application/json
+        - application/json
       description: Paginated Table List
       parameters:
-      - description: SourceID
-        in: path
-        name: sourceId
-        required: true
-        type: integer
-      - description: TableID
-        in: path
-        name: sourceId
-        required: true
-        type: integer
-      - description: Page
-        in: query
-        name: page
-        type: integer
-      - description: Limit
-        in: query
-        name: limit
-        type: integer
+        - description: SourceID
+          in: path
+          name: sourceId
+          required: true
+          type: integer
+        - description: TableID
+          in: path
+          name: sourceId
+          required: true
+          type: integer
+        - description: Page
+          in: query
+          name: page
+          type: integer
+        - description: Limit
+          in: query
+          name: limit
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -369,23 +369,23 @@ paths:
             type: array
       summary: List Table Data
       tags:
-      - Sources
+        - Sources
   /api/v1/users:
     get:
       consumes:
-      - application/json
+        - application/json
       description: Paginated User List
       parameters:
-      - description: Page
-        in: query
-        name: page
-        type: integer
-      - description: Page
-        in: query
-        name: limit
-        type: integer
+        - description: Page
+          in: query
+          name: page
+          type: integer
+        - description: Page
+          in: query
+          name: limit
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -395,20 +395,20 @@ paths:
             type: array
       summary: List User
       tags:
-      - Users
+        - Users
     post:
       consumes:
-      - application/json
+        - application/json
       description: Create entity
       parameters:
-      - description: User Data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/routes.UserRequest'
+        - description: User Data
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/routes.UserRequest'
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -416,20 +416,20 @@ paths:
             $ref: '#/definitions/entity.User'
       summary: Create User
       tags:
-      - Users
+        - Users
   /api/v1/users/:id:
     delete:
       consumes:
-      - application/json
+        - application/json
       description: Remove By ID
       parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: integer
+        - description: User ID
+          in: path
+          name: id
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -437,19 +437,19 @@ paths:
             $ref: '#/definitions/entity.User'
       summary: Remove User
       tags:
-      - Users
+        - Users
     get:
       consumes:
-      - application/json
+        - application/json
       description: Get By ID
       parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: integer
+        - description: User ID
+          in: path
+          name: id
+          required: true
+          type: integer
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -457,25 +457,25 @@ paths:
             $ref: '#/definitions/entity.User'
       summary: Detail User
       tags:
-      - Users
+        - Users
     put:
       consumes:
-      - application/json
+        - application/json
       description: Update entity
       parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: User Data
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/routes.UserRequest'
+        - description: User ID
+          in: path
+          name: id
+          required: true
+          type: integer
+        - description: User Data
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/routes.UserRequest'
       produces:
-      - application/json
+        - application/json
       responses:
         "200":
           description: OK
@@ -483,5 +483,5 @@ paths:
             $ref: '#/definitions/entity.User'
       summary: Update User
       tags:
-      - Users
+        - Users
 swagger: "2.0"

@@ -15,6 +15,10 @@ type User struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+type userRepository struct {
+	db *gorm.DB
+}
+
 func (user *User) BeforeCreate(tx *gorm.DB) (err error) {
 	err = user.hashPassword()
 	return err
@@ -41,4 +45,50 @@ func (user *User) hashPassword() error {
 func (user *User) IsPasswordCorrect(password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	return err == nil
+}
+
+func (r userRepository) GetUserById(id int) (User, error) {
+	var user User
+	if err := r.db.Where(User{ID: id}).First(&user).Error; err != nil {
+		return User{}, err
+	}
+
+	return user, nil
+}
+
+func (r userRepository) GetUserByUsername(username string) (User, error) {
+	var user User
+	if err := r.db.Where(User{Username: username}).First(&user).Error; err != nil {
+		return User{}, err
+	}
+
+	return user, nil
+}
+
+func (r userRepository) CreateUser(user *User) error {
+	return r.db.Create(user).Error
+}
+
+func (r userRepository) UpdateUser(user *User) error {
+	return r.db.Save(user).Error
+}
+
+func (r userRepository) RemoveUser(user *User) error {
+	return r.db.Delete(user).Error
+}
+
+func (r userRepository) ListUsers(page, limit int) ([]User, error) {
+	var users []User
+	offset := (page - 1) * limit
+	if err := r.db.Offset(offset).Limit(limit).Find(&users).Error; err != nil {
+		return []User{}, err
+	}
+
+	return users, nil
+}
+
+func (r userRepository) GetUsersCount() int64 {
+	var count int64
+	r.db.Model(&User{}).Count(&count)
+	return count
 }

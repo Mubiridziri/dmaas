@@ -2,11 +2,15 @@ package app
 
 import (
 	"dmaas/internal/config"
-	"dmaas/internal/context"
-	"dmaas/internal/controller"
 	"dmaas/internal/database"
-	"dmaas/internal/dto"
-	"dmaas/internal/handler"
+	"dmaas/internal/entity"
+	"dmaas/internal/server"
+	"dmaas/internal/usecase/dictionaries"
+	"dmaas/internal/usecase/dictionarydata"
+	"dmaas/internal/usecase/sources"
+	"dmaas/internal/usecase/tabledata"
+	"dmaas/internal/usecase/tables"
+	"dmaas/internal/usecase/users"
 	"net/http"
 )
 
@@ -29,18 +33,25 @@ func (a *Application) Run() error {
 		return err
 	}
 
-	var sourceSender = make(chan dto.SourceMessage)
+	repo := entity.NewRepository(db)
 
-	//Create ApplicationContext
-	ctx := context.New(cfg, db, sourceSender)
+	userController := users.NewController(repo)
+	sourceController := sources.NewController(repo, db, make(chan sources.Job))
+	tableController := tables.NewController(repo)
+	tableDataController := tabledata.NewController(repo)
+	dictController := dictionaries.NewController(repo)
+	dictDataController := dictionarydata.NewController(repo)
 
-	//Start SourceHandler
-	sourceHandler := handler.SourceHandler{Context: ctx}
-	go sourceHandler.HandleSources(sourceSender)
+	s := server.New(server.Config{
+		UserController:           userController,
+		SourceController:         sourceController,
+		TableController:          tableController,
+		TableDataController:      tableDataController,
+		DictionaryController:     dictController,
+		DictionaryDataController: dictDataController,
+	})
 
-	router := controller.Router{Context: ctx}
-
-	return http.ListenAndServe(a.BindAddr, router.NewRouter())
+	return http.ListenAndServe(a.BindAddr, s.Router)
 }
 
 func New(bindAddr string) *Application {
