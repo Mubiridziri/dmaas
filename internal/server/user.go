@@ -125,9 +125,9 @@ func (s *Server) handleProfile(c *gin.Context) {
 //	@Success		200	{object}	[]users.PaginatedUsersList
 //	@Router			/api/v1/users [GET]
 func (s *Server) handleListUser(c *gin.Context) {
-	var query ListQuery
+	query, err := s.getListQuery(c)
 
-	if err := c.ShouldBindQuery(&query); err != nil {
+	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"error": "bad query params: " + err.Error(),
 		})

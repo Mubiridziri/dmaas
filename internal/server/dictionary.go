@@ -20,9 +20,9 @@ import (
 //	@Success		200	{object}	[]dictionaries.PaginatedDictionariesList
 //	@Router			/api/v1/dictionaries [GET]
 func (s *Server) handleListDictionaries(c *gin.Context) {
-	var query ListQuery
+	query, err := s.getListQuery(c)
 
-	if err := c.ShouldBindQuery(&query); err != nil {
+	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"error": "bad query params: " + err.Error(),
 		})

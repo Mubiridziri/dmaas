@@ -14,6 +14,7 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"net/http"
+	"strconv"
 )
 
 const UserKey = "AUTH"
@@ -41,9 +42,9 @@ type Server struct {
 }
 
 type ListQuery struct {
-	Page     int
-	Limit    int
-	Simplify bool
+	Page     int  `form:"page"`
+	Limit    int  `form:"limit"`
+	Simplify bool `form:"simplify"`
 }
 
 func New(config Config) *Server {
@@ -124,4 +125,29 @@ func AuthRequired(controller *users.Controller) gin.HandlerFunc {
 		c.Next()
 	}
 
+}
+
+func (s *Server) getListQuery(c *gin.Context) (ListQuery, error) {
+	pageQuery := c.Query("page")
+	limitQuery := c.Query("limit")
+	simplifyQuery := c.Query("simplify")
+
+	if simplifyQuery == "" {
+		simplifyQuery = "false"
+	}
+
+	page, err := strconv.Atoi(pageQuery)
+	limit, err := strconv.Atoi(limitQuery)
+	simplify, err := strconv.ParseBool(simplifyQuery)
+
+	if err != nil {
+		return ListQuery{}, err
+	}
+
+	query := ListQuery{
+		Page:     page,
+		Limit:    limit,
+		Simplify: simplify,
+	}
+	return query, nil
 }

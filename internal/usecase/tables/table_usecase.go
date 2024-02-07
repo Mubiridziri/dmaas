@@ -13,7 +13,7 @@ type PaginatedTablesView struct {
 type Repository interface {
 	ListTables(Source entity.Source, page, limit int) ([]entity.Table, error)
 	GetTableById(id int) (entity.Table, error)
-	GetTablesCount() int64
+	GetTablesCount(source entity.Source) int64
 }
 
 type Controller struct {
@@ -37,7 +37,7 @@ func (c Controller) ListTables(source entity.Source, page, limit int) (Paginated
 	}
 
 	return PaginatedTablesView{
-		Total:   c.Repository.GetTablesCount(),
+		Total:   c.Repository.GetTablesCount(source),
 		Entries: tableViews,
 	}, nil
 

@@ -120,9 +120,9 @@ func (r tableRepository) GetTableById(id int) (Table, error) {
 	return table, nil
 }
 
-func (r tableRepository) GetTablesCount() int64 {
+func (r tableRepository) GetTablesCount(source Source) int64 {
 	var count int64
-	r.db.Model(&Table{}).Count(&count)
+	r.db.Model(&Table{}).Where(Table{SourceID: source.ID}).Count(&count)
 	return count
 }
 

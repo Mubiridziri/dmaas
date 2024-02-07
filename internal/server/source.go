@@ -20,9 +20,9 @@ import (
 //	@Success		200	{object}	[]sources.PaginatedSourcesList
 //	@Router			/api/v1/sources [GET]
 func (s *Server) handleListSource(c *gin.Context) {
-	var query ListQuery
+	query, err := s.getListQuery(c)
 
-	if err := c.ShouldBindQuery(&query); err != nil {
+	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"error": "bad query params: " + err.Error(),
 		})
@@ -168,9 +168,9 @@ func (s *Server) handleSourceTablesList(c *gin.Context) {
 		return
 	}
 
-	var query ListQuery
+	query, err := s.getListQuery(c)
 
-	if err := c.ShouldBindQuery(&query); err != nil {
+	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"error": "bad query params: " + err.Error(),
 		})
@@ -220,9 +220,9 @@ func (s *Server) handleListTableData(c *gin.Context) {
 		return
 	}
 
-	var query ListQuery
+	query, err := s.getListQuery(c)
 
-	if err := c.ShouldBindQuery(&query); err != nil {
+	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"error": "bad query params: " + err.Error(),
 		})
