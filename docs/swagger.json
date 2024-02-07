@@ -347,6 +347,107 @@
                 }
             }
         },
+        "/api/v1/sources/{id}/tables": {
+            "get": {
+                "description": "List tables of source",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sources"
+                ],
+                "summary": "Get Source Tables List",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Source ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Limit of page",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/tables.PaginatedTablesView"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sources/{sourceId}/data/{tableId}": {
+            "get": {
+                "description": "List data of source table",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sources"
+                ],
+                "summary": "Get Data from source table",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Source ID",
+                        "name": "sourceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Table ID",
+                        "name": "tableId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Limit of page",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/tabledata.PaginatedTableDataList"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/users": {
             "get": {
                 "description": "List of users",
@@ -658,6 +759,26 @@
                 }
             }
         },
+        "sources.SourceTableView": {
+            "type": "object",
+            "properties": {
+                "comment": {
+                    "type": "string"
+                },
+                "fields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sources.TableFieldView"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "sources.SourceView": {
             "type": "object",
             "properties": {
@@ -690,6 +811,55 @@
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "sources.TableFieldView": {
+            "type": "object",
+            "properties": {
+                "comment": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "nullable": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "tabledata.PaginatedTableDataList": {
+            "type": "object",
+            "properties": {
+                "entries": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "tables.PaginatedTablesView": {
+            "type": "object",
+            "properties": {
+                "entries": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sources.SourceTableView"
+                    }
+                },
+                "total": {
+                    "type": "integer"
                 }
             }
         },

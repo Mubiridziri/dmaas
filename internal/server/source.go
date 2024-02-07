@@ -143,11 +143,124 @@ func (s *Server) handleDeleteSource(c *gin.Context) {
 	c.JSON(http.StatusOK, outputSource)
 }
 
+// handleListSource GoDoc
+//
+//	@Summary	Get Source Tables List
+//	@Schemes
+//	@Description	List tables of source
+//	@Param			id	path	int	true	"Source ID"
+//	@Param			page	query	int	false	"Page"
+//	@Param			limit	query	int	false	"Limit of page"
+//	@Tags			Sources
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	[]tables.PaginatedTablesView
+//	@Router			/api/v1/sources/{id}/tables [GET]
+func (s *Server) handleSourceTablesList(c *gin.Context) {
+	idParam := c.Param("id")
+
+	id, err := strconv.Atoi(idParam)
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid ID param in path",
+		})
+		return
+	}
+
+	var query ListQuery
+
+	if err := c.ShouldBindQuery(&query); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": "bad query params: " + err.Error(),
+		})
+		return
+	}
+
+	//TODO Use repository in controller is bad?
+	source, err := s.sourceController.Repository.GetSourceById(id)
+
+	rows, err := s.tableController.ListTables(source, query.Page, query.Limit)
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error": "Server error: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, rows)
+}
+
+// handleListTableData GoDoc
+//
+//	@Summary	Get Data from source table
+//	@Schemes
+//	@Description	List data of source table
+//	@Param			sourceId	path	int	true	"Source ID"
+//	@Param			tableId	path	int	true	"Table ID"
+//	@Param			page	query	int	false	"Page"
+//	@Param			limit	query	int	false	"Limit of page"
+//	@Tags			Sources
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	[]tabledata.PaginatedTableDataList
+//	@Router			/api/v1/sources/{sourceId}/data/{tableId} [GET]
+func (s *Server) handleListTableData(c *gin.Context) {
+	idSourceParam := c.Param("sourceId")
+	idTableParam := c.Param("tableId")
+
+	sourceId, err := strconv.Atoi(idSourceParam)
+	tableId, err := strconv.Atoi(idTableParam)
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid ID param in path",
+		})
+		return
+	}
+
+	var query ListQuery
+
+	if err := c.ShouldBindQuery(&query); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": "bad query params: " + err.Error(),
+		})
+		return
+	}
+
+	//TODO Use repository in controller is bad?
+	source, err := s.sourceController.Repository.GetSourceById(sourceId)
+	table, err := s.tableController.Repository.GetTableById(tableId)
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+			"error": err.Error(),
+		})
+	}
+
+	rows, err := s.tableDataController.ListTableData(source, table, query.Page, query.Limit)
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error": "Server error: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, rows)
+}
+
 func (s *Server) AddSourceRoutes(g *gin.RouterGroup) {
 	grp := g.Group("/sources")
 
+	//Sources
 	grp.GET("", s.handleListSource)
 	grp.POST("", s.handleCreateSource)
 	grp.GET("/:id", s.handleDetailSource)
 	grp.DELETE("/:id", s.handleDeleteSource)
+
+	//Tables
+	grp.GET("/:id/tables", s.handleSourceTablesList)
+	grp.GET("/data/:id", s.handleListTableData)
 }
