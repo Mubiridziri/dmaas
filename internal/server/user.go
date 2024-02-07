@@ -112,6 +112,18 @@ func (s *Server) handleProfile(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// handleListUser GoDoc
+//
+//	@Summary	Get Users List
+//	@Schemes
+//	@Description	List of users
+//	@Param			page	query	int	false	"Page"
+//	@Param			limit	query	int	false	"Limit of page"
+//	@Tags			Users
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	[]users.PaginatedUsersList
+//	@Router			/api/v1/users [GET]
 func (s *Server) handleListUser(c *gin.Context) {
 	var query ListQuery
 
@@ -135,6 +147,17 @@ func (s *Server) handleListUser(c *gin.Context) {
 
 }
 
+// handleCreateUser GoDoc
+//
+//	@Summary	Create User
+//	@Schemes
+//	@Description	Creating user
+//	@Param			user	body	users.CreateOrUpdateUserView	true	"User"
+//	@Tags			Users
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	users.UserView
+//	@Router			/api/v1/users [POST]
 func (s *Server) handleCreateUser(c *gin.Context) {
 	var createUser users.CreateOrUpdateUserView
 
@@ -157,6 +180,17 @@ func (s *Server) handleCreateUser(c *gin.Context) {
 
 }
 
+// handleUpdateUser GoDoc
+//
+//	@Summary	Update User
+//	@Schemes
+//	@Description	Updating user
+//	@Param			user	body	users.CreateOrUpdateUserView	true	"User"
+//	@Tags			Users
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	users.UserView
+//	@Router			/api/v1/users [PUT]
 func (s *Server) handleUpdateUser(c *gin.Context) {
 	idParam := c.Param("id")
 
@@ -189,6 +223,17 @@ func (s *Server) handleUpdateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// handleDetailUser GoDoc
+//
+//	@Summary	Detail User
+//	@Schemes
+//	@Description	Get user info by user id
+//	@Param			id	path	int	true	"User ID"
+//	@Tags			Users
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	users.UserView
+//	@Router			/api/v1/users/{id} [GET]
 func (s *Server) handleDetailUser(c *gin.Context) {
 	idParam := c.Param("id")
 
@@ -213,6 +258,17 @@ func (s *Server) handleDetailUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// handleDeleteUser GoDoc
+//
+//	@Summary	Delete User
+//	@Schemes
+//	@Description	Deleting user
+//	@Param			id	path	int	true	"User ID"
+//	@Tags			Users
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	users.UserView
+//	@Router			/api/v1/users/{id} [DELETE]
 func (s *Server) handleDeleteUser(c *gin.Context) {
 	idParam := c.Param("id")
 

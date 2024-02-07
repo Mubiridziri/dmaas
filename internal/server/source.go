@@ -7,6 +7,18 @@ import (
 	"strconv"
 )
 
+// handleListSource GoDoc
+//
+//	@Summary	Get Sources List
+//	@Schemes
+//	@Description	List of sources
+//	@Param			page	query	int	false	"Page"
+//	@Param			limit	query	int	false	"Limit of page"
+//	@Tags			Sources
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	[]sources.PaginatedSourcesList
+//	@Router			/api/v1/sources [GET]
 func (s *Server) handleListSource(c *gin.Context) {
 	var query ListQuery
 
@@ -29,6 +41,17 @@ func (s *Server) handleListSource(c *gin.Context) {
 	c.JSON(http.StatusOK, rows)
 }
 
+// handleCreateSource GoDoc
+//
+//	@Summary	Create Source
+//	@Schemes
+//	@Description	Creating source
+//	@Param			source	body	sources.CreateOrUpdateSourceView	true	"Source"
+//	@Tags			Sources
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	sources.SourceView
+//	@Router			/api/v1/sources [POST]
 func (s *Server) handleCreateSource(c *gin.Context) {
 	var createSource sources.CreateOrUpdateSourceView
 
@@ -50,6 +73,17 @@ func (s *Server) handleCreateSource(c *gin.Context) {
 	c.JSON(http.StatusOK, outputSources)
 }
 
+// handleDetailSource GoDoc
+//
+//	@Summary	Detail Source
+//	@Schemes
+//	@Description	Get source info by source id
+//	@Param			id	path	int	true	"Source ID"
+//	@Tags			Sources
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	sources.SourceView
+//	@Router			/api/v1/sources/{id} [GET]
 func (s *Server) handleDetailSource(c *gin.Context) {
 	idParam := c.Param("id")
 
@@ -74,6 +108,17 @@ func (s *Server) handleDetailSource(c *gin.Context) {
 	c.JSON(http.StatusOK, outputSource)
 }
 
+// handleDeleteSource GoDoc
+//
+//	@Summary	Delete Source
+//	@Schemes
+//	@Description	Deleting source
+//	@Param			id	path	int	true	"Source ID"
+//	@Tags			Sources
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	sources.SourceView
+//	@Router			/api/v1/sources/{id} [DELETE]
 func (s *Server) handleDeleteSource(c *gin.Context) {
 	idParam := c.Param("id")
 

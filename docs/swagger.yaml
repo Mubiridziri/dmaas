@@ -1,4 +1,145 @@
 definitions:
+  dictionaries.CreateOrUpdateDictionaryFieldView:
+    properties:
+      name:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+    required:
+    - name
+    - title
+    - type
+    type: object
+  dictionaries.CreateOrUpdateDictionaryView:
+    properties:
+      fields:
+        items:
+          $ref: '#/definitions/dictionaries.CreateOrUpdateDictionaryFieldView'
+        type: array
+      title:
+        type: string
+    required:
+    - fields
+    - title
+    type: object
+  dictionaries.DictionaryFieldView:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+    type: object
+  dictionaries.DictionaryView:
+    properties:
+      created_at:
+        type: string
+      fields:
+        items:
+          $ref: '#/definitions/dictionaries.DictionaryFieldView'
+        type: array
+      id:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  dictionaries.PaginatedDictionariesList:
+    properties:
+      entries:
+        items:
+          $ref: '#/definitions/dictionaries.DictionaryView'
+        type: array
+      total:
+        type: integer
+    type: object
+  sources.CreateOrUpdateSourceView:
+    properties:
+      host:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      port:
+        type: integer
+      schema:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+      username:
+        type: string
+    required:
+    - host
+    - name
+    - password
+    - port
+    - title
+    - type
+    - username
+    type: object
+  sources.PaginatedSourcesList:
+    properties:
+      entries:
+        items:
+          $ref: '#/definitions/sources.SourceView'
+        type: array
+      total:
+        type: integer
+    type: object
+  sources.SourceView:
+    properties:
+      alive:
+        type: boolean
+      created_at:
+        type: string
+      host:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      port:
+        type: integer
+      schema:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  users.CreateOrUpdateUserView:
+    properties:
+      name:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - name
+    - password
+    - username
+    type: object
+  users.PaginatedUsersList:
+    properties:
+      entries:
+        items:
+          $ref: '#/definitions/users.UserView'
+        type: array
+      total:
+        type: integer
+    type: object
   users.UserLogin:
     properties:
       password:
@@ -23,6 +164,94 @@ definitions:
 info:
   contact: {}
 paths:
+  /api/v1/dictionaries:
+    get:
+      consumes:
+      - application/json
+      description: List of dictionaries
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Limit of page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dictionaries.PaginatedDictionariesList'
+            type: array
+      summary: Get Dictionaries List
+      tags:
+      - Dictionaries
+    post:
+      consumes:
+      - application/json
+      description: Creating dictionary
+      parameters:
+      - description: Dictionary
+        in: body
+        name: dictionary
+        required: true
+        schema:
+          $ref: '#/definitions/dictionaries.CreateOrUpdateDictionaryView'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dictionaries.DictionaryView'
+      summary: Create dictionary
+      tags:
+      - Dictionaries
+  /api/v1/dictionaries/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deleting dictionary
+      parameters:
+      - description: Dictionary ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dictionaries.DictionaryView'
+      summary: Deleting dictionary
+      tags:
+      - Dictionaries
+    get:
+      consumes:
+      - application/json
+      description: Get dictionary info by dictionary id
+      parameters:
+      - description: Dictionary ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dictionaries.DictionaryView'
+      summary: Detail dictionary
+      tags:
+      - Dictionaries
   /api/v1/login:
     get:
       consumes:
@@ -72,4 +301,201 @@ paths:
       summary: Logout
       tags:
       - Security
+  /api/v1/sources:
+    get:
+      consumes:
+      - application/json
+      description: List of sources
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Limit of page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/sources.PaginatedSourcesList'
+            type: array
+      summary: Get Sources List
+      tags:
+      - Sources
+    post:
+      consumes:
+      - application/json
+      description: Creating source
+      parameters:
+      - description: Source
+        in: body
+        name: source
+        required: true
+        schema:
+          $ref: '#/definitions/sources.CreateOrUpdateSourceView'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sources.SourceView'
+      summary: Create Source
+      tags:
+      - Sources
+  /api/v1/sources/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deleting source
+      parameters:
+      - description: Source ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sources.SourceView'
+      summary: Delete Source
+      tags:
+      - Sources
+    get:
+      consumes:
+      - application/json
+      description: Get source info by source id
+      parameters:
+      - description: Source ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sources.SourceView'
+      summary: Detail Source
+      tags:
+      - Sources
+  /api/v1/users:
+    get:
+      consumes:
+      - application/json
+      description: List of users
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Limit of page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/users.PaginatedUsersList'
+            type: array
+      summary: Get Users List
+      tags:
+      - Users
+    post:
+      consumes:
+      - application/json
+      description: Creating user
+      parameters:
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/users.CreateOrUpdateUserView'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/users.UserView'
+      summary: Create User
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: Updating user
+      parameters:
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/users.CreateOrUpdateUserView'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/users.UserView'
+      summary: Update User
+      tags:
+      - Users
+  /api/v1/users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deleting user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/users.UserView'
+      summary: Delete User
+      tags:
+      - Users
+    get:
+      consumes:
+      - application/json
+      description: Get user info by user id
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/users.UserView'
+      summary: Detail User
+      tags:
+      - Users
 swagger: "2.0"
