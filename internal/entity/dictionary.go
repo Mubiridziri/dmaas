@@ -53,28 +53,10 @@ type dictionaryDataRepository struct {
 }
 
 func (r dictionaryRepository) CreateDictionary(dictionary *Dictionary) error {
-	//Сохраняем справочник в транзакции с полями, если возникает ошибка откатываем всё, включая справочник
-	err := r.db.Transaction(func(tx *gorm.DB) error {
-		err := r.db.Create(dictionary).Error
-		if err != nil {
-			return err
-		}
-
-		for _, field := range dictionary.Fields {
-			field.DictionaryID = dictionary.ID
-			err = r.db.Create(&field).Error
-			if err != nil {
-				return err
-			}
-		}
-
-		return nil
-	})
-
-	return err
+	return r.db.Create(dictionary).Error
 }
 
-func (r dictionaryRepository) UpdateDictionary(dictionary *Dictionary) error {
+func (r dictionaryRepository) UpdateDictionary(dictionary *Dictionary, removeFields []DictionaryField) error {
 	//Сохраняем справочник в транзакции с полями, если возникает ошибка откатываем всё, включая справочник
 	err := r.db.Transaction(func(tx *gorm.DB) error {
 		err := r.db.Save(dictionary).Error
@@ -82,13 +64,8 @@ func (r dictionaryRepository) UpdateDictionary(dictionary *Dictionary) error {
 			return err
 		}
 
-		for _, field := range dictionary.Fields {
-			field.DictionaryID = dictionary.ID
-			if field.ID == 0 {
-				err = r.db.Create(&field).Error
-			} else {
-				err = r.db.Save(&field).Error
-			}
+		for _, field := range removeFields {
+			err = r.db.Delete(&field).Error
 			if err != nil {
 				return err
 			}

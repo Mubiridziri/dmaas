@@ -26,6 +26,7 @@ type CreateOrUpdateDictionaryView struct {
 }
 
 type CreateOrUpdateDictionaryFieldView struct {
+	ID    int    `json:"id"`
 	Title string `json:"title"  binding:"required"`
 	Name  string `json:"name"  binding:"required"`
 	Type  string `json:"type"  binding:"required"`
@@ -38,7 +39,7 @@ type PaginatedDictionariesList struct {
 
 type Repository interface {
 	CreateDictionary(dictionary *entity.Dictionary) error
-	UpdateDictionary(dictionary *entity.Dictionary) error
+	UpdateDictionary(dictionary *entity.Dictionary, removeFields []entity.DictionaryField) error
 	RemoveDictionary(dictionary *entity.Dictionary) error
 	ListDictionaries(page, limit int) ([]entity.Dictionary, error)
 	GetDictionaryById(id int) (entity.Dictionary, error)
@@ -58,17 +59,14 @@ func (c Controller) CreateDictionary(input CreateOrUpdateDictionaryView) (Dictio
 		Title: input.Title,
 	}
 
-	var fields []entity.DictionaryField
-
 	for _, inputField := range input.Fields {
 		field := entity.DictionaryField{
 			Title: inputField.Title,
 			Name:  inputField.Name,
 			Type:  inputField.Type,
 		}
-		fields = append(fields, field)
+		dict.Fields = append(dict.Fields, field)
 	}
-	dict.Fields = fields
 
 	err := c.Repository.CreateDictionary(&dict)
 
@@ -79,9 +77,63 @@ func (c Controller) CreateDictionary(input CreateOrUpdateDictionaryView) (Dictio
 	return fromDBDictionary(&dict), nil
 }
 
-//func (c Controller) UpdateDictionary(dictionary *entity.Dictionary) error {
-//	return useCase.UpdateDictionary(dictionary)
-//}
+func (c Controller) UpdateDictionary(id int, input CreateOrUpdateDictionaryView) (DictionaryView, error) {
+	dict, err := c.Repository.GetDictionaryById(id)
+
+	if err != nil {
+		return DictionaryView{}, err
+	}
+
+	dict.Title = input.Title
+
+	//adding & updating fields
+	for _, inputField := range input.Fields {
+		exists := false
+		for _, field := range dict.Fields {
+			if field.ID == inputField.ID {
+				field.Name = inputField.Name
+				field.Title = inputField.Title
+				field.Type = inputField.Type
+				exists = true
+				break
+			}
+		}
+
+		if !exists {
+			dict.Fields = append(dict.Fields, entity.DictionaryField{
+				Title: inputField.Title,
+				Name:  inputField.Name,
+				Type:  inputField.Type,
+			})
+		}
+	}
+
+	var removeFields []entity.DictionaryField
+
+	for index, field := range dict.Fields {
+		exists := false
+		for _, inputField := range input.Fields {
+			if field.ID == inputField.ID {
+				exists = true
+				break
+			}
+		}
+
+		if !exists {
+			dict.Fields = append(dict.Fields[:index], dict.Fields[index+1:]...)
+			removeFields = append(removeFields, field)
+		}
+	}
+
+	err = c.Repository.UpdateDictionary(&dict, removeFields)
+
+	if err != nil {
+		return DictionaryView{}, err
+	}
+
+	return fromDBDictionary(&dict), nil
+
+}
 
 func (c Controller) RemoveDictionary(id int) (DictionaryView, error) {
 

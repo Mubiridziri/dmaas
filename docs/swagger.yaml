@@ -297,6 +297,32 @@ paths:
       summary: Detail dictionary
       tags:
       - Dictionaries
+    put:
+      consumes:
+      - application/json
+      description: Updating dictionary
+      parameters:
+      - description: Dictionary ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Dictionary
+        in: body
+        name: dictionary
+        required: true
+        schema:
+          $ref: '#/definitions/dictionaries.CreateOrUpdateDictionaryView'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dictionaries.DictionaryView'
+      summary: Update dictionary
+      tags:
+      - Dictionaries
   /api/v1/login:
     get:
       consumes:

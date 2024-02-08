@@ -107,6 +107,45 @@
                     }
                 }
             },
+            "put": {
+                "description": "Updating dictionary",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dictionaries"
+                ],
+                "summary": "Update dictionary",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Dictionary ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Dictionary",
+                        "name": "dictionary",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dictionaries.CreateOrUpdateDictionaryView"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dictionaries.DictionaryView"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "description": "Deleting dictionary",
                 "consumes": [

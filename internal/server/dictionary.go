@@ -73,6 +73,43 @@ func (s *Server) handleCreateDictionary(c *gin.Context) {
 	c.JSON(http.StatusOK, outputSources)
 }
 
+// handleUpdateDictionary GoDoc
+//
+//	@Summary	Update dictionary
+//	@Schemes
+//	@Description	Updating dictionary
+//	@Param			id	path	int	true	"Dictionary ID"
+//	@Param			dictionary	body	dictionaries.CreateOrUpdateDictionaryView	true	"Dictionary"
+//	@Tags			Dictionaries
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	dictionaries.DictionaryView
+//	@Router			/api/v1/dictionaries/{id} [PUT]
+func (s *Server) handleUpdateDictionary(c *gin.Context) {
+	idParam := c.Param("id")
+
+	id, err := strconv.Atoi(idParam)
+
+	var createDict dictionaries.CreateOrUpdateDictionaryView
+
+	if err := c.ShouldBindJSON(&createDict); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": "Bind error: " + err.Error(),
+		})
+		return
+	}
+
+	outputSources, err := s.dictionaryController.UpdateDictionary(id, createDict)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error": "Server error: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, outputSources)
+}
+
 // handleDetailDictionary GoDoc
 //
 //	@Summary	Detail dictionary
@@ -148,6 +185,7 @@ func (s *Server) AddDictionaryRoutes(g *gin.RouterGroup) {
 
 	grp.GET("", s.handleListDictionaries)
 	grp.POST("", s.handleCreateDictionary)
+	grp.PUT("/:id", s.handleUpdateDictionary)
 	grp.GET("/:id", s.handleDetailDictionary)
 	grp.DELETE("/:id", s.handleDeleteDictionary)
 
