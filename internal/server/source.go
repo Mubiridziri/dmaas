@@ -192,6 +192,43 @@ func (s *Server) handleSourceTablesList(c *gin.Context) {
 	c.JSON(http.StatusOK, rows)
 }
 
+// handleListTableSchema GoDoc
+//
+//	@Summary	Get Data from source table
+//	@Schemes
+//	@Description	List data of source table
+//	@Param			sourceId	path	int	true	"Source ID"
+//	@Param			tableId	path	int	true	"Table ID"
+//	@Tags			Sources
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	[]sources.SourceTableView
+//	@Router			/api/v1/sources/{sourceId}/schema/{tableId} [GET]
+func (s *Server) handleListTableSchema(c *gin.Context) {
+	idSourceParam := c.Param("id")
+	idTableParam := c.Param("tableId")
+
+	_, err := strconv.Atoi(idSourceParam)
+	tableId, err := strconv.Atoi(idTableParam)
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid ID param in path",
+		})
+		return
+	}
+
+	table, err := s.tableController.Repository.GetTableById(tableId)
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+			"error": err.Error(),
+		})
+	}
+
+	c.JSON(http.StatusOK, table)
+}
+
 // handleListTableData GoDoc
 //
 //	@Summary	Get Data from source table
@@ -207,7 +244,7 @@ func (s *Server) handleSourceTablesList(c *gin.Context) {
 //	@Success		200	{object}	[]tabledata.PaginatedTableDataList
 //	@Router			/api/v1/sources/{sourceId}/data/{tableId} [GET]
 func (s *Server) handleListTableData(c *gin.Context) {
-	idSourceParam := c.Param("sourceId")
+	idSourceParam := c.Param("id")
 	idTableParam := c.Param("tableId")
 
 	sourceId, err := strconv.Atoi(idSourceParam)
@@ -262,5 +299,6 @@ func (s *Server) AddSourceRoutes(g *gin.RouterGroup) {
 
 	//Tables
 	grp.GET("/:id/tables", s.handleSourceTablesList)
-	grp.GET("/data/:id", s.handleListTableData)
+	grp.GET("/:id/data/:tableId", s.handleListTableData)
+	grp.GET("/:id/schema/:tableId", s.handleListTableSchema)
 }

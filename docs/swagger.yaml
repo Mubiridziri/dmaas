@@ -1,6 +1,8 @@
 definitions:
   dictionaries.CreateOrUpdateDictionaryFieldView:
     properties:
+      id:
+        type: integer
       name:
         type: string
       title:
@@ -523,6 +525,34 @@ paths:
           schema:
             items:
               $ref: '#/definitions/tabledata.PaginatedTableDataList'
+            type: array
+      summary: Get Data from source table
+      tags:
+      - Sources
+  /api/v1/sources/{sourceId}/schema/{tableId}:
+    get:
+      consumes:
+      - application/json
+      description: List data of source table
+      parameters:
+      - description: Source ID
+        in: path
+        name: sourceId
+        required: true
+        type: integer
+      - description: Table ID
+        in: path
+        name: tableId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/sources.SourceTableView'
             type: array
       summary: Get Data from source table
       tags:

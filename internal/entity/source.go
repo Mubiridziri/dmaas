@@ -136,7 +136,7 @@ func (r tableDataRepository) ListTableData(localSchemaName string, table Table, 
 }
 
 func (r tableDataRepository) GetTableDataCount(localSchemaName string, table Table) int64 {
-	var data map[string]int64
+	var data int64
 	sql := fmt.Sprintf("SELECT COUNT(*) as count FROM %v.%v", localSchemaName, table.Name)
 	err := r.db.Raw(sql).Scan(&data).Error
 
@@ -144,5 +144,5 @@ func (r tableDataRepository) GetTableDataCount(localSchemaName string, table Tab
 		return 0
 	}
 
-	return data["count"]
+	return data
 }
