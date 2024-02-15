@@ -7,12 +7,14 @@ import (
 )
 
 type User struct {
-	ID        int       `gorm:"primary_key" json:"id"`
-	Name      string    `json:"name"`
-	Username  string    `gorm:"unique" json:"username"`
-	Password  string    `json:"-"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID        int    `gorm:"primary_key"`
+	Name      string `json:"name"`
+	Username  string `gorm:"unique"`
+	Role      string
+	Email     string `gorm:"unique"`
+	Password  string
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 type userRepository struct {

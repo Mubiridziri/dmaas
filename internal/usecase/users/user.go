@@ -14,6 +14,8 @@ type UserLogin struct {
 type UserView struct {
 	Name      string    `json:"name"`
 	Username  string    `json:"username"`
+	Role      string    `json:"role"`
+	Email     string    `json:"email"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
@@ -22,6 +24,7 @@ type CreateOrUpdateUserView struct {
 	Name     string `json:"name"  binding:"required"`
 	Username string `json:"username"  binding:"required"`
 	Password string `json:"password"  binding:"required"`
+	Email    string `json:"email"  binding:"required"`
 }
 
 type Repository interface {
@@ -66,6 +69,8 @@ func (c Controller) CreateUser(input CreateOrUpdateUserView) (UserView, error) {
 		Name:     input.Name,
 		Username: input.Username,
 		Password: input.Password,
+		Email:    input.Email,
+		Role:     "admin", //TODO temp
 	}
 	if err := c.Repository.CreateUser(&user); err != nil {
 		return UserView{}, err
@@ -84,6 +89,7 @@ func (c Controller) UpdateUser(id int, input CreateOrUpdateUserView) (UserView, 
 
 	user.Name = input.Name
 	user.Username = input.Username
+	user.Email = input.Email
 
 	if input.Password != "" {
 		user.Password = input.Password
@@ -156,6 +162,8 @@ func fromDBUser(user *entity.User) UserView {
 	return UserView{
 		Name:      user.Name,
 		Username:  user.Username,
+		Role:      user.Role,
+		Email:     user.Email,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 	}

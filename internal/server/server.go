@@ -140,6 +140,14 @@ func (s *Server) getListQuery(c *gin.Context) (ListQuery, error) {
 	limit, err := strconv.Atoi(limitQuery)
 	simplify, err := strconv.ParseBool(simplifyQuery)
 
+	if page == 0 {
+		page = 1
+	}
+
+	if limit == 0 {
+		limit = 10
+	}
+
 	if err != nil {
 		return ListQuery{}, err
 	}

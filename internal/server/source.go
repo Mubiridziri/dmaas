@@ -297,7 +297,7 @@ func (s *Server) AddSourceRoutes(g *gin.RouterGroup) {
 	grp.GET("/:id", s.handleDetailSource)
 	grp.DELETE("/:id", s.handleDeleteSource)
 
-	//Tables
+	//Source Tables
 	grp.GET("/:id/tables", s.handleSourceTablesList)
 	grp.GET("/:id/data/:tableId", s.handleListTableData)
 	grp.GET("/:id/schema/:tableId", s.handleListTableSchema)
